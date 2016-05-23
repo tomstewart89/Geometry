@@ -1,12 +1,12 @@
 #include <Geometry.h>
 
 /*
-   This example shows ho you can use the Geometry library to calculate the forward and inverse kinematics of an arbitrary length kinematic chain. The kinematic chain is specified
-   Denavit-Hartenburg parameters, if you're not familiar with them watch this tutorial https://www.youtube.com/watch?v=rA9tm0gTln8 . The forward kinematics calculates the location of the
-   end effector given a set of joint angles defined by D-H parameters stored in the 'chain' member. The inverse kinematics (IK) calculate a set of joint angles given a position for the end effector.
-   In doing so it also sets these angles on the chain member. The D-H parameters in this example are based on my robot arm of which you can find a picture in the sketch folder. The algorithm 
-   can be adapted pretty easily to suit all kinds of different configurations though.
-*/
+ * This example shows ho you can use the Geometry library to calculate the forward and inverse kinematics of an arbitrary length kinematic chain. The kinematic chain is specified
+ * Denavit-Hartenburg parameters, if you're not familiar with them watch this tutorial https://www.youtube.com/watch?v=rA9tm0gTln8 . The forward kinematics calculates the location of the
+ * end effector given a set of joint angles defined by D-H parameters stored in the 'chain' member. The inverse kinematics (IK) calculate a set of joint angles given a position for the end effector.
+ * In doing so it also sets these angles on the chain member. The D-H parameters in this example are based on my robot arm of which you can find a picture in the sketch folder. The algorithm 
+ * can be adapted pretty easily to suit all kinds of different configurations though.
+ */
 
 // Link stores the D-H parameters for one link in the chain. It also has a function pointer which defines how the link moves with respect to it's parent, more on that later though
 struct Link { float d, theta, r, alpha; void(*move)(Link &, float); };
