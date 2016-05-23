@@ -141,7 +141,8 @@ void setup()
   KinematicChain<5> k;
   Transformation target;
 
-  // Now we'll configure them in accordance with my robot arm. It's joints are all revolute but you can just as easily specify PrismaticJoint or whatever else and then let the IK do it's thing
+  // Now we'll configure them in accordance with my robot arm. It's joints are all revolute but you can just as easily specify prismatic joint via k.AddLink(d, theta, r, alpha, PrismaticJoint);
+  // or whatever else and then let the IK do its thing
   k.AddLink(13, 0, 0, M_PI_2, RevoluteJoint);
   k.AddLink(0, 0, 88, 0, RevoluteJoint);
   k.AddLink(0, 0, 88, 0, RevoluteJoint);
