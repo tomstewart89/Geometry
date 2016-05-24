@@ -45,8 +45,6 @@ template<int maxLinks> class KinematicChain
       chain[noOfLinks++] = &l;
     }
 
-    int NoOfLinks() { return noOfLinks; }
-
     // Transforms pose from the end effector coordinate frame to the base coordinate frame.
     Transformation &ForwardKinematics(Transformation &pose)
     {
@@ -157,21 +155,20 @@ void setup()
   KinematicChain<10> k;
   Transformation target;
 
-  // Next let's configure some links to give to the kinematic chain
+  // Now let's configure some links to give to the kinematic chain
   RevoluteJoint l1(13, 0, 0, M_PI_2);
   RevoluteJoint l2(0, 0, 88, 0);
   RevoluteJoint l3(0, 0, 88, 0);
-  PrismaticJoint l4(13, 0, 0, M_PI_2);
-  RevoluteJoint l5(18, M_PI_2, 28, M_PI_2);
-  ImmobileJoint l6(91, 0, 0, 0);
+  PrismaticJoint l1(13, 0, 0, M_PI_2);
+  RevoluteJoint l4(18, M_PI_2, 28, M_PI_2);
+  ImmobileJoint l5(91, 0, 0, 0);
 
-  // and now add them to the chain
+  // and we'll add them to the chain
   k.AddLink(l1);
   k.AddLink(l2);
   k.AddLink(l3);
   k.AddLink(l4);
   k.AddLink(l5);
-  k.AddLink(l6);
 
   Serial << "End effector starting position is:\n" << k.ForwardKinematics().p << "\n\n";
   
@@ -180,15 +177,8 @@ void setup()
   target.p.Z() = 20;
 
   Serial << "Attempting to set a position of:\n" << target.p << "\n\n ... working\n\n";  
-
-  // Now we can run the IK and try to set the chain end effector to a given Point
-  Serial << "Arrived at position: " << k.InverseKinematics(target).p << "\n\n";
-
-  Serial << "Calculated D-H Parameters (d,theta,r,alpha) are: \n\n";
-
-  // We can see how the IK modified the D-H parameters of the chain like so. Note that the links will only have moved in accordance with their respective Move functions
-  for(int i = 0; i < k.NoOfLinks(); i++)
-    Serial << "Link: " << i << ": " << k.chain[i]->d << ", " << k.chain[i]->theta << ", " << k.chain[i]->r << ", " << k.chain[i]->alpha << "\n"; 
+  
+  Serial << "Arrived at position: " << k.InverseKinematics(target).p;
 }
 
 void loop() { }
