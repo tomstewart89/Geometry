@@ -23,7 +23,6 @@ template<int maxLinks> class KinematicChain
     // A few variables used in the inverse kinematics defined here to save re-allocating them every time inverse kinematics is called
     Point deltaPose;
     Matrix<maxLinks> deltaAngles;
-    Matrix<1,3> inverseJacobian;
     Matrix<3,1> jacobian;
     Transformation currentPose, perturbedPose;
 
@@ -102,12 +101,10 @@ template<int maxLinks> class KinematicChain
           // Now divide the change in x/y/z position by the amount by which we moved the joint to find a jacobian in the form of {dx/dtheta, dy/dtheta, dz/dtheta}
           jacobian = (currentPose.p - perturbedPose.p) * (1 / perturbance);
 
-          // Ideally we'd find the pseudoinverse of this jacobian, but that's quite a bit of doing. For this example we'll just use the transpose as an inverse of sorts.
-          inverseJacobian = Transpose(jacobian);
-
           // Now calculate a change in joint angle to bring the chain towards the target position. The joint angle / position relatioship is really non-linear so the
           // jacobian won't be valid very far from the operating point and it's better to move only a little bit at a time; this is handled with the convergeSpeed parameter
-          deltaAngles.Set((inverseJacobian * deltaPose) * convergenceSpeed, link);
+          // Ideally we'd find the pseudoinverse of the jacobian here, but that's quite a bit of doing. For this example we'll just use the transpose as an inverse of sorts.
+          deltaAngles.Set((jacobian.Transpose() * deltaPose) * convergenceSpeed, link);
         }
 
         // Update the link angles
