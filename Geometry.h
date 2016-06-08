@@ -9,11 +9,9 @@
 class Point : public Matrix<3,1,float>
 {
 public:
-    Point() { Reset(); }
+    Point() { Fill(0); }
     Point(const Point &obj) : Matrix<3,1,float>() { (*this) = obj; }
     Point(const Matrix<3,1,float> &obj) { (*this) = obj; }
-
-    void Reset();
 
     float Magnitude();
     float DotProduct(Point &obj);
@@ -30,11 +28,11 @@ public:
 class Rotation : public Matrix<3,3,float>
 {
 public:
-    Rotation() { Reset(); }
+    Rotation() { SetToIdentity(); }
     Rotation(const Rotation &obj) : Matrix<3,3,float>() { (*this) = obj; }
     Rotation(const Matrix<3,3,float> &obj) { (*this) = obj; }
 
-    void Reset();
+    void SetToIdentity();
 
     Rotation &FromEulerAngles(float phi, float theta, float psi);
     Matrix<3,2> ToEulerAngles();
@@ -49,15 +47,12 @@ public:
 // A transformation matrix class (rotation plus a coordinate) in a 3 dimensional space
 class Transformation
 {
-    static float dummyElement;
 public:
     Rotation R;
     Point p;
 
-    Transformation() { Reset(); }
+    Transformation() { R.SetToIdentity(); p.Fill(0); }
     Transformation(const Transformation &obj) { (*this) = obj; }
-
-    void Reset();
 
     Transformation &operator*=(Transformation &obj);
     Transformation operator*(Transformation &obj);
@@ -83,3 +78,4 @@ Print &operator<<(Print &strm, const Rotation &obj);
 Print &operator<<(Print &strm, const Transformation &obj);
 
 #endif // GEOMETRY_H
+

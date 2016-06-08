@@ -14,7 +14,7 @@ Transformation	KEYWORD1
 # Methods and Functions (KEYWORD2)
 #######################################
 
-Reset	KEYWORD2
+SetToIdentity	KEYWORD2
 Magnitude	KEYWORD2
 DotProduct	KEYWORD2
 CrossProduct	KEYWORD2

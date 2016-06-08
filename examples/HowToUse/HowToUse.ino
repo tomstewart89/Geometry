@@ -2,15 +2,15 @@
 
 /*
  * This example sketch should show you everything you need to know in order to work with the Geometry library. It's a faily long explantion
- * but try to read through it carefully. It assumes a bit of knowledge about rotation and transformation matrices so if you're not familiar 
+ * but try to read through it carefully. It assumes a bit of knowledge about rotation and transformation matrices so if you're not familiar
  * with them, then have a read through wikipedia.org/wiki/Rotation_matrix . Transformation matrices are used pretty heavily in
  * manipulators so for more information on them, have a read of wikipedia.org/wiki/Denavit-Hartenberg_parameters
  */
 
-void setup() 
+void setup()
 {
   Serial.begin(115200);
-  
+
   // This library defines three classes, Point, Rotation and Transformation
 
   // Point represents a coordinate in 3D space
@@ -42,22 +42,22 @@ void setup()
   // Rotation represents a rotated coordinate frame (a set of x/y/z axes) expressed with respect to a base frame.
   Rotation R1, R2;
 
-  // You can rotate a these matrices about the X, Y or Z axis using the Rotate methods. These operations are the equivilent of premultiplying the 
-  // rotation matrix by the corresponding matrix described in the Basic rotations heading of the Rotation Matrix wikipedia page. 
+  // You can rotate a these matrices about the X, Y or Z axis using the Rotate methods. These operations are the equivilent of premultiplying the
+  // rotation matrix by the corresponding matrix described in the Basic rotations heading of the Rotation Matrix wikipedia page.
   // Note that all angles should be specified in radians.
   R1.RotateZ(M_PI_4);
   R1.RotateY(0.9);
   R1.RotateX(0.2);
- 
+
   // And you can print them just as you would a matrix
   Serial << "R1 = " << R1 << '\n';
 
   // You can think of a rotation matrix as just three 3x1 vectors which describe the direction of the x/y/z axes of a rotated coordinate frame with respect to a base frame.
   // To illustrate that let's take the columns of R1 and set them to three Point instances
   Point R1x, R1y, R1z;
-  R1x.Set(R1,0,0,0,0);
-  R1y.Set(R1,0,0,0,1);
-  R1z.Set(R1,0,0,0,2);
+  R1x = R1.Submatrix(Range<3>(0),Range<1>(0));
+  R1y = R1.Submatrix(Range<3>(0),Range<1>(1));
+  R1z = R1.Submatrix(Range<3>(0),Range<1>(2));
 
   // Now looking at the magnitudes we can see that they're all unit vectors
   Serial << "R1 X,Y & Z magnitudes: " << R1x.Magnitude() << ", " << R1y.Magnitude() << " & " << R1z.Magnitude() << "\n";
@@ -107,7 +107,7 @@ void setup()
   Rotation R4 = R2 * R1;
 
   // Rotation matrices have the property that their transpose is their inverse so we can undo a rotation by premultiplying by the transpose. So, the following statement rotates R1, then rotates it back again:
-  Serial << "R1 =             " << R1 << "\nR2^T * R2 * R1 = " << (Transpose(R2) * R2 * R1) << "\n\n";
+  Serial << "R1 =             " << R1 << "\nR2^T * R2 * R1 = " << (R2.Transpose() * R2 * R1) << "\n\n";
 
   // Last is the Transformation class which is the aggregation of a Point and a Rotation. A transformation matrix represents a set of rotated x, y, z axes whose origin is at some coordinate.
   // is a coordinate frame whose origin is located at a particular point. They're useful for representing a position plus an orientation
@@ -135,3 +135,4 @@ void setup()
 }
 
 void loop() { }
+

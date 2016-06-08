@@ -8,11 +8,11 @@
  */
 
 // Link stores the D-H parameters for one link in the chain. It's an abstract base class so to use it you have to subclass it and define the Move function, more on that later though
-class Link 
+class Link
 {
 public:
   float d, theta, r, alpha;
-  
+
   Link(float _d, float _theta, float _r, float _alpha) : d(_d), theta(_theta), r(_r), alpha(_alpha) { }
   virtual void Move(float amount) = 0;
 };
@@ -65,7 +65,7 @@ template<int maxLinks> class KinematicChain
     Transformation ForwardKinematics()
     {
       currentPose.Reset();
-      return ForwardKinematics(currentPose); 
+      return ForwardKinematics(currentPose);
     }
 
     // Calculates the joints angles Transforms targetPose to the R^chainsize domain of link angles and sets it on the internal chain array
@@ -97,14 +97,14 @@ template<int maxLinks> class KinematicChain
 
           // And set the link back to where it was for now
           chain[link]->Move(-perturbance);
-          
+
           // Now divide the change in x/y/z position by the amount by which we moved the joint to find a jacobian in the form of {dx/dtheta, dy/dtheta, dz/dtheta}
           jacobian = (currentPose.p - perturbedPose.p) * (1 / perturbance);
 
           // Now calculate a change in joint angle to bring the chain towards the target position. The joint angle / position relatioship is really non-linear so the
           // jacobian won't be valid very far from the operating point and it's better to move only a little bit at a time; this is handled with the convergeSpeed parameter
           // Ideally we'd find the pseudoinverse of the jacobian here, but that's quite a bit of doing. For this example we'll just use the transpose as an inverse of sorts.
-          deltaAngles.Set((jacobian.Transpose() * deltaPose) * convergenceSpeed, link);
+          deltaAngles(link) = ((jacobian.Transpose() * deltaPose) * convergenceSpeed)(0);
         }
 
         // Update the link angles
@@ -114,7 +114,7 @@ template<int maxLinks> class KinematicChain
 
       return currentPose;
     }
-}; 
+};
 
 // In addition to the D-H parameters, the joint also needs to specify how the D-H parameters change in response to it's movement. This let's the inverse kinematics algorithm know how useful the joints movement is in reaching
 // the goal position. You can define how the joint moves by subclassing Link and overriding the Move function. The function should modify the link's D-H parameters in some way proportional to the 'amount' parameter.
@@ -171,12 +171,12 @@ void setup()
   k.AddLink(l6);
 
   Serial << "End effector starting position is:\n" << k.ForwardKinematics().p << "\n\n";
-  
+
   target.p.X() = 110;
   target.p.Y() = 80;
   target.p.Z() = 20;
 
-  Serial << "Attempting to set a position of:\n" << target.p << "\n\n ... working\n\n";  
+  Serial << "Attempting to set a position of:\n" << target.p << "\n\n ... working\n\n";
 
   // Now we can run the IK and try to set the chain end effector to a given Point
   Serial << "Arrived at position: " << k.InverseKinematics(target).p << "\n\n";
@@ -185,7 +185,8 @@ void setup()
 
   // We can see how the IK modified the D-H parameters of the chain like so. Note that the links will only have moved in accordance with their respective Move functions
   for(int i = 0; i < k.NoOfLinks(); i++)
-    Serial << "Link: " << i << ": " << k.chain[i]->d << ", " << k.chain[i]->theta << ", " << k.chain[i]->r << ", " << k.chain[i]->alpha << "\n"; 
+    Serial << "Link: " << i << ": " << k.chain[i]->d << ", " << k.chain[i]->theta << ", " << k.chain[i]->r << ", " << k.chain[i]->alpha << "\n";
 }
 
 void loop() { }
+

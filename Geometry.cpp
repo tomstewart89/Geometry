@@ -1,16 +1,11 @@
 #include "Geometry.h"
 
-float Transformation::dummyElement;
-
 Point &Point::operator=(const Matrix<3,1> &obj)
 {
-    memcpy(this->m,(float*)obj.m, 3 * sizeof(float));
-    return *this;
-}
+    for(int i = 0; i < 3; i++)
+        (*this)(i,0) = obj(i,0);
 
-void Point::Reset()
-{
-    this->Clear();
+    return *this;
 }
 
 Point Point::CrossProduct(Point &p)
@@ -45,9 +40,9 @@ float Point::DotProduct(Point &obj)
 }
 
 
-void Rotation::Reset()
+void Rotation::SetToIdentity()
 {
-    this->Clear();
+    Fill(0);
 
     for(int i = 0; i < 3; i++)
         (*this)(i,i) = 1;
@@ -55,7 +50,10 @@ void Rotation::Reset()
 
 Rotation &Rotation::operator=(const Matrix<3,3> &obj)
 {
-    memcpy(this->m,(float*)obj.m, 3 * 3 * sizeof(float));
+    for(int i = 0; i < Rows(); i++)
+        for(int j = 0; j < Cols(); j++)
+            (*this)(i,j)  = obj(i,j);
+
     return *this;
 }
 
@@ -181,15 +179,9 @@ Transformation &Transformation::operator=(const Matrix<4,4> &obj)
 {
     for(int i = 0; i < 4; i++)
         for(int j = 0; j < 4; i++)
-            (*this)(i,j) = obj.m[i * 4 + j];
+            (*this)(i,j) = obj(i,j);
 
     return *this;
-}
-
-void Transformation::Reset()
-{
-    R.Reset();
-    p.Reset();
 }
 
 Transformation &Transformation::operator*=(Transformation &obj)
@@ -212,10 +204,12 @@ Transformation Transformation::operator*(Transformation &obj)
 
 float &Transformation::operator()(int row, int col)
 {
+    static float dummy;
+
     if(col == 3)
-        return (row == 3)? (dummyElement = 1) : p(row);
+        return (row == 3)? (dummy = 1) : p(row);
     else
-        return (row == 3)? (dummyElement = 0) : R(row,col);
+        return (row == 3)? (dummy = 0) : R(row,col);
 }
 
 Transformation &Transformation::RotateX(float phi)
@@ -294,9 +288,9 @@ Print &operator<<(Print &strm, const Transformation &obj)
         for(int j = 0; j < 4; j++)
         {
             if(j == 3)
-                strm << ((i == 3)? 1 : obj.p.m[i]);
+                strm << ((i == 3)? 1 : obj.p(i,j));
             else
-                strm << ((i == 3)? 0 : obj.R.m[(i * 3) + j]);
+                strm << ((i == 3)? 0 : obj.R(i,j));
 
             strm << ((j == 4 - 1)? '}' : ',');
         }
@@ -305,3 +299,4 @@ Print &operator<<(Print &strm, const Transformation &obj)
     }
     return strm;
 }
+
