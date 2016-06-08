@@ -54,6 +54,8 @@ public:
     Transformation() { R.SetToIdentity(); p.Fill(0); }
     Transformation(const Transformation &obj) { (*this) = obj; }
 
+    void Zero();
+
     Transformation &operator*=(Transformation &obj);
     Transformation operator*(Transformation &obj);
 

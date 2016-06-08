@@ -175,6 +175,12 @@ Rotation &Rotation::RotateZ(float psi)
     return (*this);
 }
 
+void Transformation::Zero()
+{
+    p.Fill(0);
+    R.SetToIdentity();
+}
+
 Transformation &Transformation::operator=(const Matrix<4,4> &obj)
 {
     for(int i = 0; i < 4; i++)

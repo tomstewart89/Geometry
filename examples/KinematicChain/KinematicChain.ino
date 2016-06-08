@@ -64,7 +64,7 @@ template<int maxLinks> class KinematicChain
     // Handy overload to save having to feed in a fresh Transformation every time
     Transformation ForwardKinematics()
     {
-      currentPose.Reset();
+      currentPose.Zero();
       return ForwardKinematics(currentPose);
     }
 
@@ -75,7 +75,7 @@ template<int maxLinks> class KinematicChain
       for (int it = 0; it < maxIterations; it++)
       {
         // First find the current end effector position
-        currentPose.Reset();
+        currentPose.Zero();
         ForwardKinematics(currentPose);
 
         // And find the error between the target and the current pose
@@ -89,7 +89,7 @@ template<int maxLinks> class KinematicChain
         for (unsigned int link = 0; link < noOfLinks; link++)
         {
           // Move the link a little bit
-          perturbedPose.Reset();
+          perturbedPose.Zero();
           chain[link]->Move(perturbance);
 
           // Find the change in end effector position
