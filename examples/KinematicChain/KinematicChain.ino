@@ -178,8 +178,14 @@ void setup()
 
   Serial << "Attempting to set a position of:\n" << target.p << "\n\n ... working\n\n";
 
+  unsigned long before = micros();
+
+  Transformation &pose = k.InverseKinematics(target);
+
+  unsigned long after = micros();
+
   // Now we can run the IK and try to set the chain end effector to a given Point
-  Serial << "Arrived at position: " << k.InverseKinematics(target).p << "\n\n";
+  Serial << "Arrived at position:\n" << pose.p << "\nin: " << float(after - before) <<  "us\n\n";
 
   Serial << "Calculated D-H Parameters (d,theta,r,alpha) are: \n\n";
 
