@@ -1,4 +1,5 @@
-Geometry: A library for working with points, rotations and coordinate transformations in 3D space.
+# Geometry
+A library for working with points, rotations and coordinate transformations in 3D space.
 
 **This library depends on BasicLinearAlgebra (available in the library manager) so be sure to install that too**
 
