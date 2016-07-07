@@ -11,9 +11,9 @@ float xdot, ydot, zdot, dt = 0.5;
 // Just a stub to gather some gyro-ish data
 void GetGyroData(float &xdot, float &ydot, float &zdot)
 {
-  xdot = random(-50,50) / 50.0;
-  ydot = random(-50,50) / 50.0;
-  zdot = random(-50,50) / 50.0;
+  xdot = random(-1,1) / 10.0;
+  ydot = random(-1,1) / 10.0;
+  zdot = random(-1,1) / 10.0;
 }
 
 void setup() 

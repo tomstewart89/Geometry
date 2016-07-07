@@ -55,9 +55,9 @@ void setup()
   // You can think of a rotation matrix as just three 3x1 vectors which describe the direction of the x/y/z axes of a rotated coordinate frame with respect to a base frame.
   // To illustrate that let's take the columns of R1 and set them to three Point instances
   Point R1x, R1y, R1z;
-  R1x = R1.Submatrix(Range<3>(0),Range<1>(0));
-  R1y = R1.Submatrix(Range<3>(0),Range<1>(1));
-  R1z = R1.Submatrix(Range<3>(0),Range<1>(2));
+  (Matrix<3,1>)R1x = R1.Submatrix(Range<3>(0),Range<1>(0));
+  (Matrix<3,1>)R1y = R1.Submatrix(Range<3>(0),Range<1>(1));
+  (Matrix<3,1>)R1z = R1.Submatrix(Range<3>(0),Range<1>(2));
 
   // Now looking at the magnitudes we can see that they're all unit vectors
   Serial << "R1 X,Y & Z magnitudes: " << R1x.Magnitude() << ", " << R1y.Magnitude() << " & " << R1z.Magnitude() << "\n";
