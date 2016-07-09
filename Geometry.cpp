@@ -1,13 +1,5 @@
 #include "Geometry.h"
 
-Point &Point::operator=(const Matrix<3,1> &obj)
-{
-    for(int i = 0; i < 3; i++)
-        (*this)(i,0) = obj(i,0);
-
-    return *this;
-}
-
 Point Point::CrossProduct(Point &p)
 {
     Point ret;
@@ -37,24 +29,6 @@ float Point::DotProduct(Point &obj)
         sum += (*this)(i) * obj(i);
 
     return sum;
-}
-
-
-void Rotation::SetToIdentity()
-{
-    Fill(0);
-
-    for(int i = 0; i < 3; i++)
-        (*this)(i,i) = 1;
-}
-
-Rotation &Rotation::operator=(const Matrix<3,3> &obj)
-{
-    for(int i = 0; i < Rows(); i++)
-        for(int j = 0; j < Cols(); j++)
-            (*this)(i,j)  = obj(i,j);
-
-    return *this;
 }
 
 Rotation &Rotation::FromEulerAngles(float psi, float theta, float phi)
@@ -173,21 +147,6 @@ Rotation &Rotation::RotateZ(float psi)
     (*this)(1,2) = tmp2;
 
     return (*this);
-}
-
-void Transformation::Zero()
-{
-    p.Fill(0);
-    R.SetToIdentity();
-}
-
-Transformation &Transformation::operator=(const Matrix<4,4> &obj)
-{
-    for(int i = 0; i < 4; i++)
-        for(int j = 0; j < 4; i++)
-            (*this)(i,j) = obj(i,j);
-
-    return *this;
 }
 
 Transformation &Transformation::operator*=(Transformation &obj)

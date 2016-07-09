@@ -2,7 +2,9 @@
 #define GEOMETRY_H
 
 #include "Arduino.h"
-#include "BasicLinearAlgebra.h"
+//#include "BasicLinearAlgebra.h"
+#include "/home/tom/Arduino/libraries/BasicLinearAlgebra/BasicLinearAlgebra.h"
+
 #include <math.h>
 
 // A point class for representing coordinates in a 3 dimensional space
@@ -21,18 +23,22 @@ public:
     float &Y() { return (*this)(1); }
     float &Z() { return (*this)(2); }
 
-    Point &operator=(const Matrix<3,1> &obj);
+    template<class opMemT> Point &operator=(const Matrix<3,1,float,opMemT> &obj)
+    {
+        for(int i = 0; i < 3; i++)
+            (*this)(i,0) = obj(i,0);
+
+        return *this;
+    }
 };
 
 // A rotation matrix class in a 3 dimensional space
 class Rotation : public Matrix<3,3,float>
 {
 public:
-    Rotation() { SetToIdentity(); }
+    Rotation() { *this = Identity<3,3>(); }
     Rotation(const Rotation &obj) : Matrix<3,3,float>() { (*this) = obj; }
     Rotation(const Matrix<3,3,float> &obj) { (*this) = obj; }
-
-    void SetToIdentity();
 
     Rotation &FromEulerAngles(float phi, float theta, float psi);
     Matrix<3,2> ToEulerAngles();
@@ -41,7 +47,14 @@ public:
     Rotation &RotateY(float theta);
     Rotation &RotateZ(float psi);
 
-    Rotation &operator=(const Matrix<3,3> &obj);
+    template<class opMemT> Rotation &operator=(const Matrix<3,3,float,opMemT> &obj)
+    {
+        for(int i = 0; i < Rows(); i++)
+            for(int j = 0; j < Cols(); j++)
+                (*this)(i,j)  = obj(i,j);
+
+        return *this;
+    }
 };
 
 // A transformation matrix class (rotation plus a coordinate) in a 3 dimensional space
@@ -51,15 +64,11 @@ public:
     Rotation R;
     Point p;
 
-    Transformation() { R.SetToIdentity(); p.Fill(0); }
+    Transformation() { R = Identity<3,3>(); p.Fill(0); }
     Transformation(const Transformation &obj) { (*this) = obj; }
-
-    void Zero();
 
     Transformation &operator*=(Transformation &obj);
     Transformation operator*(Transformation &obj);
-
-    Transformation &operator=(const Matrix<4,4> &obj);
 
     float &operator()(int row, int col);
 
@@ -72,6 +81,14 @@ public:
     Transformation &RotateZ(float psi);
 
     Transformation &Translate(float x, float y, float z);
+
+    template<class opMemT> Transformation &operator=(const Matrix<4,4,float,opMemT> &obj)
+    {
+        R = obj.Submatrix(Range<3>(0),Range<3>(0));
+        p = obj.Submatrix(Range<3>(3),Range<1>(0));
+
+        return *this;
+    }
 };
 
 // Stream inserters operator for printing to strings or the serial port
