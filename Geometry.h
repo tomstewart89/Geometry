@@ -2,8 +2,7 @@
 #define GEOMETRY_H
 
 #include "Arduino.h"
-//#include "BasicLinearAlgebra.h"
-#include "/home/tom/Arduino/libraries/BasicLinearAlgebra/BasicLinearAlgebra.h"
+#include "BasicLinearAlgebra.h"
 
 #include <math.h>
 
