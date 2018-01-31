@@ -231,13 +231,13 @@ Transformation &Transformation::Translate(float x, float y, float z)
 
 Print &operator<<(Print &strm, const Point &obj)
 {
-    strm << (Matrix<3,1>)obj;
+    strm << (const Matrix<3,1>&)obj;
     return strm;
 }
 
 Print &operator<<(Print &strm, const Rotation &obj)
 {
-    strm << (Matrix<3,3>)obj;
+    strm << (const Matrix<3,3>&)obj;
     return strm;
 }
 

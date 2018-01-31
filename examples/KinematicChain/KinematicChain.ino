@@ -103,7 +103,7 @@ template<int maxLinks> class KinematicChain
          // Now calculate a change in joint angle to bring the chain towards the target position. The joint angle / position relatioship is really non-linear so the
          // jacobian won't be valid very far from the operating point and it's better to move only a little bit at a time; this is handled with the convergeSpeed parameter
          // Ideally we'd find the pseudoinverse of the jacobian here, but that's quite a bit of doing. For this example we'll just use the transpose as an inverse of sorts.
-         deltaAngles(link) = (jacobian.Transpose() * deltaPose)(0) * convergenceSpeed;
+         deltaAngles(link) = (~jacobian * deltaPose)(0) * convergenceSpeed;
        }
 
        // Update the link angles
@@ -177,11 +177,11 @@ void setup()
 
  Serial << "Attempting to set a position of:\n" << target.p << "\n\n ... working\n\n";
 
- unsigned long before;// = micros();
+ unsigned long before = micros();
 
  Transformation &pose = k.InverseKinematics(target);
 
- unsigned long after;// = micros();
+ unsigned long after = micros();
 
  // Now we can run the IK and try to set the chain end effector to a given Point
  Serial << "Arrived at position:\n" << pose.p << "\nin: " << float(after - before) <<  "us\n\n";

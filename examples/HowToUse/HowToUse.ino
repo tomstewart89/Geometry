@@ -55,9 +55,9 @@ void setup()
   // You can think of a rotation matrix as just three 3x1 vectors which describe the direction of the x/y/z axes of a rotated coordinate frame with respect to a base frame.
   // To illustrate that let's take the columns of R1 and set them to three Point instances
   Point R1x, R1y, R1z;
-  (Matrix<3,1>)R1x = R1.Submatrix(Range<3>(0),Range<1>(0));
-  (Matrix<3,1>)R1y = R1.Submatrix(Range<3>(0),Range<1>(1));
-  (Matrix<3,1>)R1z = R1.Submatrix(Range<3>(0),Range<1>(2));
+  R1x = R1.Submatrix(Slice<0,3>(),Slice<0,1>());
+  R1y = R1.Submatrix(Slice<0,3>(),Slice<1,2>());
+  R1z = R1.Submatrix(Slice<0,3>(),Slice<2,3>());
 
   // Now looking at the magnitudes we can see that they're all unit vectors
   Serial << "R1 X,Y & Z magnitudes: " << R1x.Magnitude() << ", " << R1y.Magnitude() << " & " << R1z.Magnitude() << "\n";
@@ -107,7 +107,7 @@ void setup()
   Rotation R4 = R2 * R1;
 
   // Rotation matrices have the property that their transpose is their inverse so we can undo a rotation by premultiplying by the transpose. So, the following statement rotates R1, then rotates it back again:
-  Serial << "R1 =             " << R1 << "\nR2^T * R2 * R1 = " << (R2.Transpose() * R2 * R1) << "\n\n";
+  Serial << "R1 =             " << R1 << "\nR2^T * R2 * R1 = " << (~R2 * R2 * R1) << "\n\n";
 
   // Last is the Transformation class which is the aggregation of a Point and a Rotation. A transformation matrix represents a set of rotated x, y, z axes whose origin is at some coordinate.
   // is a coordinate frame whose origin is located at a particular point. They're useful for representing a position plus an orientation

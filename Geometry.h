@@ -6,13 +6,15 @@
 
 #include <math.h>
 
+using namespace BLA;
+
 // A point class for representing coordinates in a 3 dimensional space
-class Point : public Matrix<3,1,float>
+class Point : public Matrix<3,1>
 {
 public:
     Point() { Fill(0); }
-    Point(const Point &obj) : Matrix<3,1,float>() { (*this) = obj; }
-    Point(const Matrix<3,1,float> &obj) { (*this) = obj; }
+    Point(const Point &obj) : Matrix<3,1>() { (*this) = obj; }
+    Point(const Matrix<3,1> &obj) { (*this) = obj; }
 
     float Magnitude();
     float DotProduct(Point &obj);
@@ -22,7 +24,7 @@ public:
     float &Y() { return (*this)(1); }
     float &Z() { return (*this)(2); }
 
-    template<class opMemT> Point &operator=(const Matrix<3,1,float,opMemT> &obj)
+    template<class opMemT> Point &operator=(const Matrix<3,1,opMemT> &obj)
     {
         for(int i = 0; i < 3; i++)
             (*this)(i,0) = obj(i,0);
@@ -32,12 +34,12 @@ public:
 };
 
 // A rotation matrix class in a 3 dimensional space
-class Rotation : public Matrix<3,3,float>
+class Rotation : public Matrix<3,3>
 {
 public:
     Rotation() { *this = Identity<3,3>(); }
-    Rotation(const Rotation &obj) : Matrix<3,3,float>() { (*this) = obj; }
-    Rotation(const Matrix<3,3,float> &obj) { (*this) = obj; }
+    Rotation(const Rotation &obj) : Matrix<3,3>() { (*this) = obj; }
+    Rotation(const Matrix<3,3> &obj) { (*this) = obj; }
 
     Rotation &FromEulerAngles(float phi, float theta, float psi);
     Matrix<3,2> ToEulerAngles();
@@ -46,10 +48,10 @@ public:
     Rotation &RotateY(float theta);
     Rotation &RotateZ(float psi);
 
-    template<class opMemT> Rotation &operator=(const Matrix<3,3,float,opMemT> &obj)
+    template<class opMemT> Rotation &operator=(const Matrix<3,3,opMemT> &obj)
     {
-        for(int i = 0; i < Rows(); i++)
-            for(int j = 0; j < Cols(); j++)
+        for(int i = 0; i < Rows; i++)
+            for(int j = 0; j < Cols; j++)
                 (*this)(i,j)  = obj(i,j);
 
         return *this;
@@ -81,10 +83,10 @@ public:
 
     Transformation &Translate(float x, float y, float z);
 
-    template<class opMemT> Transformation &operator=(const Matrix<4,4,float,opMemT> &obj)
+    template<class opMemT> Transformation &operator=(const Matrix<4,4,opMemT> &obj)
     {
-        R = obj.Submatrix(Range<3>(0),Range<3>(0));
-        p = obj.Submatrix(Range<3>(3),Range<1>(0));
+        R = obj.Submatrix(Slice<0,3>(),Slice<0,3>());
+        p = obj.Submatrix(Slice<0,3>(),Slice<3,4>());
 
         return *this;
     }
