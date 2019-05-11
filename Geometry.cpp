@@ -198,7 +198,7 @@ Transformation &Transformation::RotateY(float theta)
 
     tmp.X() = cos(theta) * p.X() - sin(theta) * p.Z();
     tmp.Y() = p.Y();
-    tmp.Z() = -sin(theta) * p.X() + cos(theta) * p.Z();
+    tmp.Z() = sin(theta) * p.X() + cos(theta) * p.Z();
 
     p = tmp;
 
