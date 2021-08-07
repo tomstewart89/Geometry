@@ -1,5 +1,4 @@
-#ifndef GEOMETRY_H
-#define GEOMETRY_H
+#pragma once
 
 #include <math.h>
 
@@ -12,153 +11,99 @@ using namespace BLA;
 
 namespace Geometry
 {
-using AngularVelocity = Matrix<3, 1>;
+using AngularVelocity = Matrix<3>;
 using Rotation = Matrix<3, 3>;
-using SpatialVelocity = Matrix<6, 1>;
+using SpatialVelocity = Matrix<6>;
 using Transformation = Matrix<4, 4>;
 
+class Quaternion
+{
+    Matrix<4> elems;
+
+   public:
+    Quaternion(float x, float y, float z, float w);
+
+    Quaternion(const Rotation& R);
+
+    float& x() { return elems(0); }
+    float& y() { return elems(1); }
+    float& z() { return elems(2); }
+    float& w() { return elems(3); }
+
+    Rotation to_rotation_matrix() const;
+
+    Quaternion operator*(const Quaternion& other) const;
+};
+
+class EulerAngles
+{
+   public:
+    enum RotationFrame
+    {
+        Static = 0,
+        Rotating
+    };
+
+    enum RotationOrder
+    {
+        XYZ = 0,
+        XYX,
+        XZY,
+        XZX,
+        YZX,
+        YZY,
+        YXZ,
+        YXY,
+        ZXY,
+        ZXZ,
+        ZYX,
+        ZYZ
+    };
+
+    Matrix<3> angles;
+    const RotationFrame frame;
+    const RotationOrder order;
+
+    EulerAngles(float ai, float aj, float ak, RotationFrame frame = RotationFrame::Static,
+                RotationOrder order = RotationOrder::XYZ);
+
+    EulerAngles(const Rotation& R, RotationFrame frame = RotationFrame::Static,
+                RotationOrder order = RotationOrder::XYZ);
+
+    Rotation to_rotation_matrix() const;
+};
+
 template <typename MemT>
-Matrix<3, 3> skew(const Matrix<3, 1, MemT>& so3)
+Matrix<3, 3> skew(const Matrix<3, 1, MemT>& w)
 {
     Matrix<3, 3> skew_m;
 
     skew_m(0, 0) = 0.0;
-    skew_m(0, 1) = -so3(2);
-    skew_m(0, 2) = so3(1);
-    skew_m(1, 0) = so3(2);
     skew_m(1, 1) = 0.0;
-    skew_m(1, 2) = -so3(0);
-    skew_m(2, 0) = -so3(1);
-    skew_m(2, 1) = so3(0);
     skew_m(2, 2) = 0.0;
 
+    skew_m(0, 1) = -w(2);
+    skew_m(0, 2) = w(1);
+    skew_m(1, 2) = -w(0);
+
+    skew_m(1, 0) = -skew_m(0, 1);
+    skew_m(2, 0) = -skew_m(0, 2);
+    skew_m(2, 1) = -skew_m(1, 2);
+
     return skew_m;
 }
 
-Matrix<4, 4> skew(const Matrix<6>& se3)
-{
-    Matrix<4, 4> skew_m = Zeros<4, 4>();
+Matrix<4, 4> skew(const Matrix<6>& v);
 
-    skew_m.Submatrix<3, 3>(0, 0) = skew(se3.Submatrix<3, 1>(0, 0));
-    skew_m.Submatrix<3, 1>(0, 3) = se3.Submatrix<3, 1>(3, 0);
-    return skew_m;
-}
+Rotation exp(const AngularVelocity& w);
+Transformation exp(const SpatialVelocity& v);
 
-Rotation exp(const AngularVelocity& so3)
-{
-    auto theta = Norm((Matrix<3>)so3);
+AngularVelocity log(const Rotation& R);
+SpatialVelocity log(const Transformation& T);
 
-    if (fabs(theta) < 1e-5)
-    {
-        theta = 1.0;
-    }
+Matrix<6, 6> adjoint(const Transformation& T);
+Matrix<6, 6> adjoint(const SpatialVelocity& v);
 
-    auto so3_skew = skew(so3 / theta);
-    return Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
-}
-
-Transformation exp(const SpatialVelocity& se3)
-{
-    auto theta = Norm(se3.Submatrix<3, 1>(0, 0));
-
-    if (fabs(theta) < 1e-5)
-    {
-        theta = 1.0;
-    }
-
-    auto so3_skew = skew(se3.Submatrix<3, 1>(0, 0) / theta);
-    auto so3_skew_sq = so3_skew * so3_skew;
-
-    Transformation SE3 = Identity<4>();
-    SE3.Submatrix<3, 3>(0, 0) = exp(se3.Submatrix<3, 1>(0, 0));
-    SE3.Submatrix<3, 1>(0, 3) =
-        (Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) *
-        se3.Submatrix<3, 1>(0, 3);
-
-    return SE3;
-}
-
-AngularVelocity log(const Rotation& SO3)
-{
-    AngularVelocity so3;
-
-    if (Norm(SO3 - Identity<3>()) < 1e-5)
-    {
-        so3 = Zeros<3>();
-    }
-    else if (Trace(SO3) == -1.0)
-    {
-        if (SO3(0, 0) != -1.0)
-        {
-            so3 = SO3.Column(0) * 1.0 / sqrt(2.0 * (1.0 + SO3(0, 0)));
-            so3(0) += 1.0;
-        }
-        else
-        {
-            so3 = SO3.Column(1) * 1.0 / sqrt(2.0 * (1.0 + SO3(1, 1)));
-            so3(1) += 1.0;
-        }
-    }
-    else
-    {
-        auto theta = acos((Trace(SO3) - 1.0) / 2.0);
-        auto omega_skew = (SO3 - ~SO3) / (2.0 * sin(theta));
-        so3(0) = omega_skew(2, 1);
-        so3(1) = omega_skew(0, 2);
-        so3(2) = omega_skew(1, 0);
-        so3 *= theta;
-    }
-
-    return so3;
-}
-
-SpatialVelocity log(const Transformation& SE3)
-{
-    SpatialVelocity se3;
-
-    if (Norm(SE3.Submatrix<3, 3>(0, 0) - Identity<3>()) < 1e-5)
-    {
-        se3.Submatrix<3, 1>(0, 0).Fill(0);
-        se3.Submatrix<3, 1>(0, 3) = SE3.Submatrix<3, 1>(0, 3);
-    }
-    else
-    {
-        auto so3 = log(SE3.Submatrix<3, 3>(0, 0));
-        auto theta = Norm(so3);
-        auto so3_skew = skew(so3 / theta);
-        auto so3_skew_sq = so3_skew * so3_skew;
-
-        auto G_inv = Identity<3>() / theta - so3_skew / 2.0 +
-                     so3_skew_sq * (1.0 / theta - cos(theta / 2.0) / sin(theta / 2.0) / 2.0);
-
-        se3.Submatrix<3, 1>(0, 0) = so3;
-        se3.Submatrix<3, 1>(0, 3) = G_inv * SE3.Submatrix<3, 1>(0, 3);
-    }
-
-    return se3;
-}
-
-Matrix<6, 6> adj(const Transformation& SE3)
-{
-    Matrix<6, 6> adj_m = Zeros<6, 6>();
-
-    adj_m.Submatrix<3, 3>(0, 0) = SE3.Submatrix<3, 3>(0, 0);
-    adj_m.Submatrix<3, 3>(3, 3) = SE3.Submatrix<3, 3>(0, 0);
-    adj_m.Submatrix<3, 3>(3, 0) = skew(SE3.Submatrix<3, 1>(0, 3)) * SE3.Submatrix<3, 3>(0, 0);
-
-    return adj_m;
-}
-
-Matrix<6, 6> adj(const SpatialVelocity& se3)
-{
-    Matrix<6, 6> adj_m = Zeros<6, 6>();
-
-    adj_m.Submatrix<3, 3>(0, 0) = skew(se3.Submatrix<3, 1>(0, 0));
-    adj_m.Submatrix<3, 3>(3, 3) = skew(se3.Submatrix<3, 1>(0, 0));
-    adj_m.Submatrix<3, 3>(3, 0) = skew(se3.Submatrix<3, 1>(0, 3));
-
-    return adj_m;
-}
 }  // namespace Geometry
 
 // // A point class for representing coordinates in a 3 dimensional space
@@ -254,5 +199,3 @@ Matrix<6, 6> adj(const SpatialVelocity& se3)
 // Print &operator<<(Print &strm, const Point &obj);
 // Print &operator<<(Print &strm, const Rotation &obj);
 // Print &operator<<(Print &strm, const Transformation &obj);
-
-#endif  // GEOMETRY_H
