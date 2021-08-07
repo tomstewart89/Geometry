@@ -21,7 +21,11 @@ target_link_libraries(test_geometry gtest_main)
 add_executable(test_rotations ../Rotations.cpp test_rotations.cpp)
 target_link_libraries(test_rotations gtest_main)
 
+add_executable(test_examples ../Rotations.cpp ../Geometry.cpp test_examples.cpp)
+target_link_libraries(test_examples gtest_main)
+
 include(GoogleTest)
 
 gtest_discover_tests(test_geometry)
 gtest_discover_tests(test_rotations)
+gtest_discover_tests(test_examples)

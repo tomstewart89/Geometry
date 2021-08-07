@@ -12,10 +12,31 @@ TEST(Examples, HowToUse)
 {
     HowToUse::setup();
 
-    EXPECT_STREQ(Serial.buf.str().c_str(),
-                 "v(1): 43.67\n"
-                 "B: [[9.79,9.33,11.62],[7.77,14.77,14.12],[11.33,15.72,12.12]]\n"
-                 "identity matrix: [[1.00,-0.00,-0.00],[0.00,1.00,-0.00],[0.00,0.00,1.00]]");
+    EXPECT_STREQ(Serial.buf.str().c_str(), "");
+}
+
+namespace ForwardKinematics
+{
+#include "../examples/ForwardKinematics/ForwardKinematics.ino"
+}
+
+TEST(Examples, ForwardKinematics)
+{
+    ForwardKinematics::setup();
+
+    EXPECT_STREQ(Serial.buf.str().c_str(), "");
+}
+
+namespace InverseDynamics
+{
+#include "../examples/InverseDynamics/InverseDynamics.ino"
+}
+
+TEST(Examples, InverseDynamics)
+{
+    InverseDynamics::setup();
+
+    EXPECT_STREQ(Serial.buf.str().c_str(), "");
 }
 
 int main(int argc, char **argv)
