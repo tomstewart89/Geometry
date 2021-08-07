@@ -18,6 +18,10 @@ include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/.." "${PROJEC
 add_executable(test_geometry ../Geometry.cpp test_geometry.cpp)
 target_link_libraries(test_geometry gtest_main)
 
+add_executable(test_rotations ../Rotations.cpp test_rotations.cpp)
+target_link_libraries(test_rotations gtest_main)
+
 include(GoogleTest)
 
 gtest_discover_tests(test_geometry)
+gtest_discover_tests(test_rotations)
