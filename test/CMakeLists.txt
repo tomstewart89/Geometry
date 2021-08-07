@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(bla_tests)
+project(geometry_tests)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -13,9 +13,9 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/..")
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/.." "${PROJECT_SOURCE_DIR}/BasicLinearAlgebra")
 
-add_executable(test_geometry test_geometry.cpp)
+add_executable(test_geometry ../Geometry.cpp test_geometry.cpp)
 target_link_libraries(test_geometry gtest_main)
 
 include(GoogleTest)

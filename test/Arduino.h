@@ -18,5 +18,6 @@ struct Print
         buf << std::fixed << std::showpoint << std::setprecision(2);
         buf.str("");
     }
+};
 
-} Serial;
+static Print Serial;
