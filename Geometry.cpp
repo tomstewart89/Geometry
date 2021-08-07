@@ -1,267 +1,192 @@
 #include "Geometry.h"
 
-Point Point::CrossProduct(Point &p)
-{
-    Point ret;
+using namespace BLA;
 
-    ret.X() = (*this).Y() * p.Z() - (*this).Z() * p.Y();
-    ret.Y() = (*this).Z() * p.X() - (*this).X() * p.Z();
-    ret.Z() = (*this).X() * p.Y() - (*this).Y() * p.X();
+namespace Geometry
+{
+Transformation::Transformation(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
+
+Transformation::Transformation(const Matrix<4, 4>& mat) : R(mat.Submatrix<3, 3>(0, 0)), p(mat.Submatrix<3, 1>(0, 3)) {}
+
+Transformation& Transformation::operator=(const BLA::Matrix<4, 4>& mat)
+{
+    R = mat.Submatrix<3, 3>(0, 0);
+    p = mat.Submatrix<3, 1>(0, 3);
+
+    return *this;
+}
+
+Transformation Transformation::operator*(const Transformation& other)
+{
+    return Transformation(R * other.R, R * other.p + p);
+}
+
+Translation Transformation::operator*(const Translation& other) { return R * other + p; }
+
+Transformation Transformation::inv() { return Transformation(~R, -(~R * p)); }
+
+SpatialVelocity::SpatialVelocity(const AngularVelocity& w_, const LinearVelocity& v_) : w(w_), v(v_) {}
+
+SpatialVelocity::SpatialVelocity(const Matrix<6>& mat) : w(mat.Submatrix<3, 1>(0, 0)), v(mat.Submatrix<3, 1>(3, 0)) {}
+
+SpatialVelocity& SpatialVelocity::operator=(const Matrix<6>& mat)
+{
+    w = mat.Submatrix<3, 1>(0, 0);
+    v = mat.Submatrix<3, 1>(3, 0);
+
+    return *this;
+}
+
+SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V)
+{
+    SpatialVelocity ret;
+
+    ret.w = A.Submatrix<3, 3>(0, 0) * V.w + A.Submatrix<3, 3>(0, 3) * V.v;
+    ret.v = A.Submatrix<3, 3>(3, 0) * V.w + A.Submatrix<3, 3>(3, 3) * V.v;
 
     return ret;
 }
 
-float Point::Magnitude()
+Matrix<3, 3> skew(const Matrix<3>& w)
 {
-    float ret = 0;
+    Matrix<3, 3> skew_m;
 
-    for(int i = 0; i < 3; i++)
-        ret += pow((*this)(i),2);
+    skew_m(0, 0) = 0.0;
+    skew_m(1, 1) = 0.0;
+    skew_m(2, 2) = 0.0;
 
-    return sqrt(ret);
+    skew_m(0, 1) = -w(2);
+    skew_m(0, 2) = w(1);
+    skew_m(1, 2) = -w(0);
+
+    skew_m(1, 0) = -skew_m(0, 1);
+    skew_m(2, 0) = -skew_m(0, 2);
+    skew_m(2, 1) = -skew_m(1, 2);
+
+    return skew_m;
 }
 
-float Point::DotProduct(Point &obj)
+Matrix<4, 4> skew(const Matrix<6>& V)
 {
-    float sum = 0;
+    Matrix<4, 4> skew_m = Zeros<4, 4>();
 
-    for(int i = 0; i < 3; i++)
-        sum += (*this)(i) * obj(i);
-
-    return sum;
+    skew_m.Submatrix<3, 3>(0, 0) = skew(V.Submatrix<3, 1>(0, 0));
+    skew_m.Submatrix<3, 1>(0, 3) = V.Submatrix<3, 1>(3, 0);
+    return skew_m;
 }
 
-Rotation &Rotation::FromEulerAngles(float psi, float theta, float phi)
+Rotation exp(const AngularVelocity& w)
 {
-    (*this)(0,0) = cos(phi) * cos(theta);
-    (*this)(1,0) = cos(theta) * sin(phi);
-    (*this)(2,0) = -sin(theta);
+    auto theta = Norm((Matrix<3>)w);
 
-    (*this)(0,1) = cos(phi) * sin(psi) * sin(theta) - cos(psi) * sin(phi);
-    (*this)(1,1) = cos(psi) * cos(phi) + sin(psi) * sin(phi) * sin(theta);
-    (*this)(2,1) = cos(theta) * sin(psi);
-
-    (*this)(0,2) = sin(psi) * sin(phi) + cos(psi) * cos(phi) * sin(theta);
-    (*this)(1,2) = cos(psi) * sin(phi) * sin(theta) - cos(phi) * sin(psi);
-    (*this)(2,2) = cos(psi) * cos(theta);
-
-    return (*this);
-}
-
-Matrix<3,2> Rotation::ToEulerAngles()
-{
-    Matrix<3,2> ret;
-
-    if((*this)(2,0) != 0)
+    if (fabs(theta) < 1e-5)
     {
-        ret(1,0) = -asin((*this)(2,0));
-        ret(1,1) = M_PI - ret(1,0);
-
-        ret(0,0) = atan2((*this)(2,1) / cos(ret(1,0)),(*this)(2,2) / cos(ret(1,0)));
-        ret(0,1) = atan2((*this)(2,1) / cos(ret(1,1)),(*this)(2,2) / cos(ret(1,1)));
-
-        ret(2,0) = atan2((*this)(1,0) / cos(ret(1,0)),(*this)(0,0) / cos(ret(1,0)));
-        ret(2,1) = atan2((*this)(1,0) / cos(ret(1,1)),(*this)(0,0) / cos(ret(1,1)));
+        theta = 1.0;
     }
-    else
-    {
-        ret(2,0) = ret(2,1) = 0;
 
-        if((*this)(2,0) == -1)
+    auto so3_skew = skew(w / theta);
+    return Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
+}
+
+Transformation exp(const SpatialVelocity& V)
+{
+    auto theta = Norm(V.w);
+
+    if (fabs(theta) < 1e-5)
+    {
+        theta = 1.0;
+    }
+
+    auto so3_skew = skew(V.w / theta);
+    auto so3_skew_sq = so3_skew * so3_skew;
+
+    Transformation T;
+    T.R = exp(V.w);
+    T.p = (Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) * V.v;
+
+    return T;
+}
+
+AngularVelocity log(const Rotation& R)
+{
+    AngularVelocity w;
+
+    if (Norm(R - Identity<3>()) < 1e-5)
+    {
+        w = Zeros<3>();
+    }
+    else if (Trace(R) == -1.0)
+    {
+        if (R(0, 0) != -1.0)
         {
-            ret(1,0) = ret(1,1) = M_PI_2;
-            ret(0,0) = ret(0,1) = atan2((*this)(0,1),(*this)(0,2));
+            w = R.Column(0) * 1.0 / sqrt(2.0 * (1.0 + R(0, 0)));
+            w(0) += 1.0;
         }
         else
         {
-            ret(1,0) = ret(1,1) = -M_PI_2;
-            ret(0,0) = ret(0,1) = atan2(-(*this)(0,1),-(*this)(0,2));
+            w = R.Column(1) * 1.0 / sqrt(2.0 * (1.0 + R(1, 1)));
+            w(1) += 1.0;
         }
     }
-
-    return ret;
-}
-
-Rotation &Rotation::RotateX(float phi)
-{
-    float tmp1, tmp2;
-
-    tmp1 = (*this)(1,0) * cos(phi) - (*this)(2,0) * sin(phi);
-    tmp2 = (*this)(2,0) * cos(phi) + (*this)(1,0) * sin(phi);
-    (*this)(1,0) = tmp1;
-    (*this)(2,0) = tmp2;
-
-    tmp1 = (*this)(1,1) * cos(phi) - (*this)(2,1) * sin(phi);
-    tmp2 = (*this)(2,1) * cos(phi) + (*this)(1,1) * sin(phi);
-    (*this)(1,1) = tmp1;
-    (*this)(2,1) = tmp2;
-
-    tmp1 = (*this)(1,2) * cos(phi) - (*this)(2,2) * sin(phi);
-    tmp2 = (*this)(2,2) * cos(phi) + (*this)(1,2) * sin(phi);
-    (*this)(1,2) = tmp1;
-    (*this)(2,2) = tmp2;
-
-    return (*this);
-}
-
-Rotation &Rotation::RotateY(float theta)
-{
-    float tmp1, tmp2;
-
-    tmp1 = (*this)(0,0) * cos(theta) + (*this)(2,0) * sin(theta);
-    tmp2 = (*this)(2,0) * cos(theta) - (*this)(0,0) * sin(theta);
-    (*this)(0,0) = tmp1;
-    (*this)(2,0) = tmp2;
-
-    tmp1 = (*this)(0,1) * cos(theta) + (*this)(2,1) * sin(theta);
-    tmp2 = (*this)(2,1) * cos(theta) - (*this)(0,1) * sin(theta);
-    (*this)(0,1) = tmp1;
-    (*this)(2,1) = tmp2;
-
-    tmp1 = (*this)(0,2) * cos(theta) + (*this)(2,2) * sin(theta);
-    tmp2 = (*this)(2,2) * cos(theta) - (*this)(0,2) * sin(theta);
-    (*this)(0,2) = tmp1;
-    (*this)(2,2) = tmp2;
-
-    return (*this);
-}
-
-Rotation &Rotation::RotateZ(float psi)
-{
-    float tmp1, tmp2;
-
-    tmp1 = (*this)(0,0) * cos(psi) -  (*this)(1,0) * sin(psi);
-    tmp2 = (*this)(1,0) * cos(psi) +  (*this)(0,0) * sin(psi);
-    (*this)(0,0) = tmp1;
-    (*this)(1,0) = tmp2;
-
-    tmp1 = (*this)(0,1) * cos(psi) -  (*this)(1,1) * sin(psi);
-    tmp2 = (*this)(1,1) * cos(psi) +  (*this)(0,1) * sin(psi);
-    (*this)(0,1) = tmp1;
-    (*this)(1,1) = tmp2;
-
-
-    tmp1 = (*this)(0,2) * cos(psi) -  (*this)(1,2) * sin(psi);
-    tmp2 = (*this)(1,2) * cos(psi) +  (*this)(0,2) * sin(psi);
-    (*this)(0,2) = tmp1;
-    (*this)(1,2) = tmp2;
-
-    return (*this);
-}
-
-Transformation &Transformation::operator*=(Transformation &obj)
-{
-    p.Matrix<3>::operator=(R * obj.p + p);
-    R.Matrix<3,3>::operator=(R * obj.R);
-
-    return *this;
-}
-
-Transformation Transformation::operator*(Transformation &obj)
-{
-    Transformation ret;
-
-    ret.p.Matrix<3>::operator=(R * obj.p + p);
-    ret.R.Matrix<3,3>::operator=(R * obj.R);
-
-    return ret;
-}
-
-float &Transformation::operator()(int row, int col)
-{
-    static float dummy;
-
-    if(col == 3)
-        return (row == 3)? (dummy = 1) : p(row);
     else
-        return (row == 3)? (dummy = 0) : R(row,col);
-}
-
-Transformation &Transformation::RotateX(float phi)
-{
-    Point tmp;
-    R.RotateX(phi);
-
-    tmp.X() = p.X();
-    tmp.Y() = cos(phi) * p.Y() - sin(phi) * p.Z();
-    tmp.Z() = sin(phi) * p.Y() + cos(phi) * p.Z();
-
-    p = tmp;
-
-    return *this;
-}
-
-Transformation &Transformation::RotateY(float theta)
-{
-    Point tmp;
-    R.RotateY(theta);
-
-    tmp.X() = cos(theta) * p.X() - sin(theta) * p.Z();
-    tmp.Y() = p.Y();
-    tmp.Z() = sin(theta) * p.X() + cos(theta) * p.Z();
-
-    p = tmp;
-
-    return *this;
-}
-
-Transformation &Transformation::RotateZ(float psi)
-{
-    Point tmp;
-    R.RotateZ(psi);
-
-    tmp.X() = cos(psi) * p.X() - sin(psi) * p.Y();
-    tmp.Y() = sin(psi) * p.X() + cos(psi) * p.Y();
-    tmp.Z() = p.Z();
-
-    p = tmp;
-
-    return *this;
-}
-
-
-Transformation &Transformation::Translate(float x, float y, float z)
-{
-    (*this).p(0) += x;
-    (*this).p(1) += y;
-    (*this).p(2) += z;
-
-    return (*this);
-}
-
-Print &operator<<(Print &strm, const Point &obj)
-{
-    strm << (const Matrix<3,1>&)obj;
-    return strm;
-}
-
-Print &operator<<(Print &strm, const Rotation &obj)
-{
-    strm << (const Matrix<3,3>&)obj;
-    return strm;
-}
-
-// Stream inserter operator for printing to strings or the serial port
-Print &operator<<(Print &strm, const Transformation &obj)
-{
-    strm << '{';
-
-    for(int i = 0; i < 4; i++)
     {
-        strm << '{';
-
-        for(int j = 0; j < 4; j++)
-        {
-            if(j == 3)
-                strm << ((i == 3)? 1 : obj.p(i,j));
-            else
-                strm << ((i == 3)? 0 : obj.R(i,j));
-
-            strm << ((j == 4 - 1)? '}' : ',');
-        }
-
-        strm << (i == 4 - 1? '}' : ',');
+        auto theta = acos((Trace(R) - 1.0) / 2.0);
+        auto omega_skew = (R - ~R) / (2.0 * sin(theta));
+        w(0) = omega_skew(2, 1);
+        w(1) = omega_skew(0, 2);
+        w(2) = omega_skew(1, 0);
+        w *= theta;
     }
-    return strm;
+
+    return w;
 }
 
+SpatialVelocity log(const Transformation& T)
+{
+    SpatialVelocity V;
+
+    if (Norm(T.R - Identity<3>()) < 1e-5)
+    {
+        V.w.Fill(0);
+        V.v = T.p;
+    }
+    else
+    {
+        auto w = log(T.R);
+        auto theta = Norm(w);
+        auto so3_skew = skew(w / theta);
+        auto so3_skew_sq = so3_skew * so3_skew;
+
+        auto G_inv = Identity<3>() / theta - so3_skew / 2.0 +
+                     so3_skew_sq * (1.0 / theta - cos(theta / 2.0) / sin(theta / 2.0) / 2.0);
+
+        V.w = w;
+        V.v = G_inv * T.p;
+    }
+
+    return V;
+}
+
+Matrix<6, 6> adjoint(const Transformation& T)
+{
+    Matrix<6, 6> adj_m = Zeros<6, 6>();
+
+    adj_m.Submatrix<3, 3>(0, 0) = T.R;
+    adj_m.Submatrix<3, 3>(3, 3) = T.R;
+    adj_m.Submatrix<3, 3>(3, 0) = skew(T.p) * T.R;
+
+    return adj_m;
+}
+
+Matrix<6, 6> adjoint(const SpatialVelocity& V)
+{
+    Matrix<6, 6> adj_m = Zeros<6, 6>();
+
+    adj_m.Submatrix<3, 3>(0, 0) = skew(V.w);
+    adj_m.Submatrix<3, 3>(3, 3) = skew(V.w);
+    adj_m.Submatrix<3, 3>(3, 0) = skew(V.v);
+
+    return adj_m;
+}
+
+}  // namespace Geometry
