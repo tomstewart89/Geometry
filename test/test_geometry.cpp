@@ -32,27 +32,37 @@ TEST(Geometry, so3LogExp)
 
 TEST(Geometry, se3LogExp)
 {
-    SpatialVelocity se3 = {0.1, 0.2, 0.3, 0.5773, 0.5773, 0.5773};
+    SpatialVelocity se3({0.1, 0.2, 0.3}, {0.5773, 0.5773, 0.5773});
     SpatialVelocity se3_log_exp = log(exp(se3));
 
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < 3; ++i)
     {
-        EXPECT_NEAR(se3(i), se3_log_exp(i), 1e-3);
+        EXPECT_NEAR(se3.w(i), se3_log_exp.w(i), 1e-3);
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_NEAR(se3.v(i), se3_log_exp.v(i), 1e-3);
     }
 }
 
 TEST(Geometry, AdjointConversions)
 {
-    Transformation Tsb = {-1, 0, 0, 4, 0, 1, 0, 0.4, 0, 0, -1, 0, 0, 0, 0, 1};
+    Transformation Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
 
-    SpatialVelocity Vb = {0, 0, -2, 2.8, 4, 0.0};
+    SpatialVelocity Vb({0, 0, -2}, {2.8, 4, 0.0});
 
-    auto Vs = adjoint(Tsb) * Vb;
-    SpatialVelocity Vs_expected = {0, 0, 2, -2, -4, 0.0};
+    SpatialVelocity Vs = adjoint(Tsb) * Vb;
+    SpatialVelocity Vs_expected({0, 0, 2}, {-2, -4, 0.0});
 
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < 3; ++i)
     {
-        EXPECT_NEAR(Vs(i), Vs_expected(i), 1e-3);
+        EXPECT_NEAR(Vs.w(i), Vs_expected.w(i), 1e-3);
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        EXPECT_NEAR(Vs.v(i), Vs_expected.v(i), 1e-3);
     }
 }
 
@@ -81,7 +91,7 @@ TEST(Geometry, QuaternionConversions)
 
 TEST(Geometry, QuaternionMultiply)
 {
-    // Quaternions actually don't have to be unitary
+    // Quaternions don't have to be unitary
     Quaternion q1(1, -2, 3, 4);
     Quaternion q2(-5, 6, 7, 8);
     Quaternion q = q1 * q2;
@@ -124,10 +134,9 @@ TEST(Geometry, EulerAngleConversions)
 
     EulerAngles euler(R);
 
-    for (int i = 0; i < 3; ++i)
-    {
-        EXPECT_NEAR(euler.angles(i), euler_expected.angles(i), 1e-3);
-    }
+    EXPECT_NEAR(euler.phi(), euler_expected.phi(), 1e-3);
+    EXPECT_NEAR(euler.theta(), euler_expected.theta(), 1e-3);
+    EXPECT_NEAR(euler.psi(), euler_expected.psi(), 1e-3);
 }
 
 TEST(Geometry, OtherEulerAngleFramesAndOrders)

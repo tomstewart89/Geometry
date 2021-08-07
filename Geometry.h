@@ -2,23 +2,78 @@
 
 #include <math.h>
 
-#include <iostream>
-
-#include "/home/tom/snap/arduino/61/Arduino/libraries/BasicLinearAlgebra/BasicLinearAlgebra.h"
 #include "Arduino.h"
-
-using namespace BLA;
+#include "BasicLinearAlgebra.h"
 
 namespace Geometry
 {
-using AngularVelocity = Matrix<3>;
-using Rotation = Matrix<3, 3>;
-using SpatialVelocity = Matrix<6>;
-using Transformation = Matrix<4, 4>;
+using Translation = BLA::Matrix<3>;
+using Rotation = BLA::Matrix<3, 3>;
+
+class Transformation
+{
+   public:
+    Rotation R;
+    Translation p;
+
+    Transformation() = default;
+    Transformation(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
+    Transformation(const BLA::Matrix<4, 4>& mat) : R(mat.Submatrix<3, 3>(0, 0)), p(mat.Submatrix<3, 1>(0, 3)) {}
+
+    Transformation& operator=(const BLA::Matrix<4, 4>& mat)
+    {
+        R = mat.Submatrix<3, 3>(0, 0);
+        p = mat.Submatrix<3, 1>(0, 3);
+
+        return *this;
+    }
+
+    Transformation operator*(const Transformation& other) { return Transformation(R * other.R, R * other.p + p); }
+
+    Translation operator*(const Translation& other) { return R * other + p; }
+
+    Transformation inv();
+};
+
+using LinearVelocity = BLA::Matrix<3>;
+using AngularVelocity = BLA::Matrix<3>;
+
+class SpatialVelocity
+{
+   public:
+    AngularVelocity w;
+    LinearVelocity v;
+
+    SpatialVelocity() = default;
+    SpatialVelocity(const AngularVelocity& w_, const LinearVelocity& v_) : w(w_), v(v_) {}
+    SpatialVelocity(const BLA::Matrix<6>& mat) : w(mat.Submatrix<3, 1>(0, 0)), v(mat.Submatrix<3, 1>(3, 0)) {}
+
+    SpatialVelocity& operator=(const BLA::Matrix<6>& mat)
+    {
+        w = mat.Submatrix<3, 1>(0, 0);
+        v = mat.Submatrix<3, 1>(3, 0);
+
+        return *this;
+    }
+};
+
+SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V);
+
+BLA::Matrix<3, 3> skew(const BLA::Matrix<3>& w);
+BLA::Matrix<4, 4> skew(const BLA::Matrix<6>& v);
+
+Rotation exp(const AngularVelocity& w);
+Transformation exp(const SpatialVelocity& v);
+
+AngularVelocity log(const Rotation& R);
+SpatialVelocity log(const Transformation& T);
+
+BLA::Matrix<6, 6> adjoint(const Transformation& T);
+BLA::Matrix<6, 6> adjoint(const SpatialVelocity& v);
 
 class Quaternion
 {
-    Matrix<4> elems;
+    BLA::Matrix<4> elems;
 
    public:
     Quaternion(float x, float y, float z, float w);
@@ -37,6 +92,8 @@ class Quaternion
 
 class EulerAngles
 {
+    BLA::Matrix<3> angles;
+
    public:
     enum RotationFrame
     {
@@ -60,11 +117,14 @@ class EulerAngles
         ZYZ
     };
 
-    Matrix<3> angles;
+    float& phi() { return angles(0); }
+    float& theta() { return angles(1); }
+    float& psi() { return angles(2); }
+
     const RotationFrame frame;
     const RotationOrder order;
 
-    EulerAngles(float ai, float aj, float ak, RotationFrame frame = RotationFrame::Static,
+    EulerAngles(float phi, float theta, float psi, RotationFrame frame = RotationFrame::Static,
                 RotationOrder order = RotationOrder::XYZ);
 
     EulerAngles(const Rotation& R, RotationFrame frame = RotationFrame::Static,
@@ -73,129 +133,4 @@ class EulerAngles
     Rotation to_rotation_matrix() const;
 };
 
-template <typename MemT>
-Matrix<3, 3> skew(const Matrix<3, 1, MemT>& w)
-{
-    Matrix<3, 3> skew_m;
-
-    skew_m(0, 0) = 0.0;
-    skew_m(1, 1) = 0.0;
-    skew_m(2, 2) = 0.0;
-
-    skew_m(0, 1) = -w(2);
-    skew_m(0, 2) = w(1);
-    skew_m(1, 2) = -w(0);
-
-    skew_m(1, 0) = -skew_m(0, 1);
-    skew_m(2, 0) = -skew_m(0, 2);
-    skew_m(2, 1) = -skew_m(1, 2);
-
-    return skew_m;
-}
-
-Matrix<4, 4> skew(const Matrix<6>& v);
-
-Rotation exp(const AngularVelocity& w);
-Transformation exp(const SpatialVelocity& v);
-
-AngularVelocity log(const Rotation& R);
-SpatialVelocity log(const Transformation& T);
-
-Matrix<6, 6> adjoint(const Transformation& T);
-Matrix<6, 6> adjoint(const SpatialVelocity& v);
-
 }  // namespace Geometry
-
-// // A point class for representing coordinates in a 3 dimensional space
-// class Point : public Matrix<3, 1>
-// {
-//    public:
-//     Point() { Fill(0); }
-//     Point(const Point &obj) : Matrix<3, 1>() { (*this) = obj; }
-//     Point(const Matrix<3, 1> &obj) { (*this) = obj; }
-
-//     float Magnitude();
-//     float DotProduct(Point &obj);
-//     Point CrossProduct(Point &p);
-
-//     float &X() { return (*this)(0); }
-//     float &Y() { return (*this)(1); }
-//     float &Z() { return (*this)(2); }
-
-//     template <class opMemT>
-//     Point &operator=(const Matrix<3, 1, opMemT> &obj)
-//     {
-//         for (int i = 0; i < 3; i++) (*this)(i, 0) = obj(i, 0);
-
-//         return *this;
-//     }
-// };
-
-// // A rotation matrix class in a 3 dimensional space
-// class Rotation : public Matrix<3, 3>
-// {
-//    public:
-//     Rotation() { *this = Identity<3, 3>(); }
-//     Rotation(const Rotation &obj) : Matrix<3, 3>() { (*this) = obj; }
-//     Rotation(const Matrix<3, 3> &obj) { (*this) = obj; }
-
-//     Rotation &FromEulerAngles(float phi, float theta, float psi);
-//     Matrix<3, 2> ToEulerAngles();
-
-//     Rotation &RotateX(float phi);
-//     Rotation &RotateY(float theta);
-//     Rotation &RotateZ(float psi);
-
-//     template <class opMemT>
-//     Rotation &operator=(const Matrix<3, 3, opMemT> &obj)
-//     {
-//         for (int i = 0; i < Rows; i++)
-//             for (int j = 0; j < Cols; j++) (*this)(i, j) = obj(i, j);
-
-//         return *this;
-//     }
-// };
-
-// // A transformation matrix class (rotation plus a coordinate) in a 3 dimensional space
-// class Transformation
-// {
-//    public:
-//     Rotation R;
-//     Point p;
-
-//     Transformation()
-//     {
-//         R = Identity<3, 3>();
-//         p.Fill(0);
-//     }
-//     Transformation(const Transformation &obj) { (*this) = obj; }
-
-//     Transformation &operator*=(Transformation &obj);
-//     Transformation operator*(Transformation &obj);
-
-//     float &operator()(int row, int col);
-
-//     float &X() { return p(0); }
-//     float &Y() { return p(1); }
-//     float &Z() { return p(2); }
-
-//     Transformation &RotateX(float phi);
-//     Transformation &RotateY(float theta);
-//     Transformation &RotateZ(float psi);
-
-//     Transformation &Translate(float x, float y, float z);
-
-//     template <class opMemT>
-//     Transformation &operator=(const Matrix<4, 4, opMemT> &obj)
-//     {
-//         R = obj.Submatrix(Slice<0, 3>(), Slice<0, 3>());
-//         p = obj.Submatrix(Slice<0, 3>(), Slice<3, 4>());
-
-//         return *this;
-//     }
-// };
-
-// // Stream inserters operator for printing to strings or the serial port
-// Print &operator<<(Print &strm, const Point &obj);
-// Print &operator<<(Print &strm, const Rotation &obj);
-// Print &operator<<(Print &strm, const Transformation &obj);
