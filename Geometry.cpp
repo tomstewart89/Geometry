@@ -37,6 +37,8 @@ SpatialVelocity& SpatialVelocity::operator=(const Matrix<6>& mat)
     return *this;
 }
 
+SpatialVelocity& SpatialVelocity::operator=(float theta) { return SpatialVelocity(w * theta, v * theta); }
+
 SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V)
 {
     SpatialVelocity ret;

@@ -41,6 +41,8 @@ class SpatialVelocity
     SpatialVelocity(const BLA::Matrix<6>& mat);
 
     SpatialVelocity& operator=(const BLA::Matrix<6>& mat);
+
+    SpatialVelocity operator*(float theta);
 };
 
 SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V);
