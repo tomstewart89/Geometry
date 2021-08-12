@@ -27,7 +27,7 @@ class Transformation
     Transformation operator*(const Transformation& other);
     Translation operator*(const Translation& other);
 
-    Transformation inv();
+    Transformation inv() const;
 };
 
 class SpatialVelocity

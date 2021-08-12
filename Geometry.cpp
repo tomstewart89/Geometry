@@ -23,7 +23,7 @@ Transformation Transformation::operator*(const Transformation& other)
 
 Translation Transformation::operator*(const Translation& other) { return R * other + p; }
 
-Transformation Transformation::inv() { return Transformation(~R, -(~R * p)); }
+Transformation Transformation::inv() const { return Transformation(~R, -(~R * p)); }
 
 SpatialVelocity::SpatialVelocity(const AngularVelocity& w_, const LinearVelocity& v_) : w(w_), v(v_) {}
 
@@ -37,7 +37,7 @@ SpatialVelocity& SpatialVelocity::operator=(const Matrix<6>& mat)
     return *this;
 }
 
-SpatialVelocity& SpatialVelocity::operator=(float theta) { return SpatialVelocity(w * theta, v * theta); }
+SpatialVelocity SpatialVelocity::operator*(float theta) { return SpatialVelocity(w * theta, v * theta); }
 
 SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V)
 {

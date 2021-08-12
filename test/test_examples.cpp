@@ -1,4 +1,5 @@
 #include <BasicLinearAlgebra.h>
+#include <Geometry.h>
 #include <gtest/gtest.h>
 
 using namespace BLA;
@@ -27,16 +28,18 @@ TEST(Examples, ForwardKinematics)
     EXPECT_STREQ(Serial.buf.str().c_str(), "");
 }
 
-namespace InverseDynamics
+namespace TFGraph
 {
-#include "../examples/InverseDynamics/InverseDynamics.ino"
+#include "../examples/TFGraph/TFGraph.ino"
 }
 
-TEST(Examples, InverseDynamics)
+TEST(Examples, TFGraph)
 {
-    InverseDynamics::setup();
+    TFGraph::setup();
 
-    EXPECT_STREQ(Serial.buf.str().c_str(), "");
+    std::cout << Serial.buf.str();
+
+    // EXPECT_STREQ(Serial.buf.str().c_str(), "");
 }
 
 int main(int argc, char **argv)
