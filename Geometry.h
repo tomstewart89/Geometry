@@ -21,9 +21,22 @@ class Transformation
 
     Transformation() = default;
     Transformation(const Rotation& R_, const Translation& p_);
-    Transformation(const BLA::Matrix<4, 4>& mat);
 
-    Transformation& operator=(const BLA::Matrix<4, 4>& mat);
+    template <typename MemT>
+    Transformation(const BLA::Matrix<4, 4, MemT>& mat)
+        : R(mat.template Submatrix<3, 3>(0, 0)), p(mat.template Submatrix<3, 1>(0, 3))
+    {
+    }
+
+    template <class MemT>
+    Transformation& operator=(const BLA::Matrix<4, 4, MemT>& mat)
+    {
+        R = mat.template Submatrix<3, 3>(0, 0);
+        p = mat.template Submatrix<3, 1>(0, 3);
+
+        return *this;
+    }
+
     Transformation operator*(const Transformation& other);
     Translation operator*(const Translation& other);
 
@@ -58,5 +71,8 @@ SpatialVelocity log(const Transformation& T);
 
 BLA::Matrix<6, 6> adjoint(const Transformation& T);
 BLA::Matrix<6, 6> adjoint(const SpatialVelocity& v);
+
+Print& operator<<(Print& strm, const Transformation& T);
+Print& operator<<(Print& strm, const SpatialVelocity& T);
 
 }  // namespace Geometry

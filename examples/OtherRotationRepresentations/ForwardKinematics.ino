@@ -4,45 +4,52 @@
  * TODO
  */
 
-struct Link
-{
-    Transformation pose;  // of the child link relative to the parent link when both theta are zero
-    Matrix<6, 6> spatial_inertia;
+// struct Link
+// {
+//     Matrix<6, 6> spatial_inertia;
+// };
 
-    Joint joint;
-};
+// struct Joint
+// {
+//     const Link& parent;
+//     const Link& child;
 
-struct Joint
-{
-    const Link& parent;
-    const Link& child;
+//     Joint(const Link& parent_, const Link& child) : parent(parent_), child(child_) {}
 
-    Joint(const Link& parent_, const Link& child) : parent(parent_), child(child_) {}
+//     Transformation pose;  // The pose of the joint when theta = 0
+//     SpatialVelocity axis;
+//     float theta = 0;
+// };
 
-    SpatialVelocity axis;
-    float theta = 0;
-};
+// x-------x
+
+// T_link_joint * T_joint_child
 
 void setup()
 {
-    Link the_world;
-    Link arm;
-    Link forearm;
-    Link hand;
+    // Link the_world;
+    // Link arm;
+    // Link forearm;
+    // Link hand;
 
-    Joint shoulder(the_world, arm);
-    Joint elbow(arm, forearm);
-    Joint wrist(forearm, hand);
+    // Joint shoulder(the_world, arm);
+    // Joint elbow(arm, forearm);
+    // Joint wrist(forearm, hand);
 
-    while (true)
-    {
-        if (link == &hand)
-        {
-            link.pose = exp(-link.joint.A * theta[link.joint.idx]) @link.joint.M;
+    // auto& joint = shoulder;
+    // Transformation pose = BLA::Identity();
 
-            break;
-        }
-    }
+    // shoulder.pose * exp(joint.axis * -joint.theta)
+
+    // while (true)
+    // {
+    //     if (link == &hand)
+    //     {
+    //         link.pose = exp(-link.joint.A * theta[link.joint.idx]) @link.joint.M;
+
+    //         break;
+    //     }
+    // }
 }
 
 void loop() {}

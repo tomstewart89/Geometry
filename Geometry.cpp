@@ -6,16 +6,6 @@ namespace Geometry
 {
 Transformation::Transformation(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
 
-Transformation::Transformation(const Matrix<4, 4>& mat) : R(mat.Submatrix<3, 3>(0, 0)), p(mat.Submatrix<3, 1>(0, 3)) {}
-
-Transformation& Transformation::operator=(const BLA::Matrix<4, 4>& mat)
-{
-    R = mat.Submatrix<3, 3>(0, 0);
-    p = mat.Submatrix<3, 1>(0, 3);
-
-    return *this;
-}
-
 Transformation Transformation::operator*(const Transformation& other)
 {
     return Transformation(R * other.R, R * other.p + p);
@@ -189,6 +179,26 @@ Matrix<6, 6> adjoint(const SpatialVelocity& V)
     adj_m.Submatrix<3, 3>(3, 0) = skew(V.v);
 
     return adj_m;
+}
+
+Print& operator<<(Print& strm, const Transformation& T)
+{
+    strm.print("R: ");
+    strm << T.R;
+    strm.print(" p: ");
+    strm << T.p;
+
+    return strm;
+}
+
+Print& operator<<(Print& strm, const SpatialVelocity& V)
+{
+    strm.print("w: ");
+    strm << V.w;
+    strm.print(" v: ");
+    strm << V.v;
+
+    return strm;
 }
 
 }  // namespace Geometry
