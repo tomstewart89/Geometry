@@ -1,11 +1,18 @@
 # Geometry
-A library for working with points, rotations and coordinate transformations in 3D space.
+### An Arduino library for representing where things are in relation to other things in 3D space.
+#### Specifically this library has implementations support for:
+* All your favourite 3D rotation formats, (as well as functions to convert them into rotation matrices and back again):
+    * Rotation matrices
+    * Quaternions
+    * Euler angles (all 24 flavors of them)
+    * Axis Angles (kind of)
+* 3D poses (a rotation and a translation) for representing the position and orientation of a rigid body in space.
+* Spatial velocities along with skew, logarithm and expontial functions to help with transforming them between coordinate frames
 
-**This library depends on BasicLinearAlgebra (available in the library manager) so be sure to install that too**
+The aim of all this is to provide everything we need to represent the 3D pose of our robot arm end effectors, our drone centers of mass or any other 3D pose we're likely to encounter in robotics; and with a footprint small enough to fit on an 8-bit microcontroller.
 
-Geometry defines three classes to represent 3D coordinates, rotation matrices and transformation matrices. All three classes inherit from the Matrix class so they're all able to do basic matrix arithmetic. Most importantly, multiplication between Points and Rotations or Rotations and Rotations allows those objects to be rotated in 3D. There's also a few useful methods for converting between rotation matrices and Euler angles as well as finding the cross product of two vectors and so on. 
+![Transformation](https://user-images.githubusercontent.com/2457362/130311793-bbc8cf45-c66f-40ca-b84a-d33004398c5e.png)
 
-These kinds of calculations are really helpful for projects involving 3D motion like robot arm kinematics or working with gyro sensor data. Enjoy!
-
-To get started, just go through the HowToUse sketch in the examples folder; that'll explain everything that most users will need to know to work with the library. There's also the KinematicChain example which uses the library to calculate the forward and inverse kinematics for an arbitrary length kinematic chain. The inverse kinematics are found using gradient descent with a jacobian transpose so there's room for improvement. Feel free to subclass KinematicChain and override that method with something better!
+## Getting Started
+To get started, have a look at the [HowToUse example](https://github.com/tomstewart89/Geometry/blob/master/examples/HowToUse/HowToUse.ino) which will get you up to speed with how 3D poses / coordinate transformations work. From there take a look at the [PoseGraph example](https://github.com/tomstewart89/Geometry/blob/master/examples/PoseGraph/PoseGraph.ino) for a nice self-contained implementation of something that resembles ROS's [TF package](http://wiki.ros.org/tf). Finally, if you want to get into some more fancy kinematics, take a look at the [InverseDynamics example](https://github.com/tomstewart89/Geometry/blob/master/examples/InverseDynamics/InverseDynamics.ino) (currently WIP)
 
