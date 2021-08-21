@@ -13,21 +13,34 @@ using Rotation = BLA::Matrix<3, 3>;
 using LinearVelocity = BLA::Matrix<3>;
 using AngularVelocity = BLA::Matrix<3>;
 
-class Transformation
+class Pose
 {
    public:
     Rotation R;
     Translation p;
 
-    Transformation() = default;
-    Transformation(const Rotation& R_, const Translation& p_);
-    Transformation(const BLA::Matrix<4, 4>& mat);
+    Pose() = default;
+    Pose(const Rotation& R_, const Translation& p_);
 
-    Transformation& operator=(const BLA::Matrix<4, 4>& mat);
-    Transformation operator*(const Transformation& other);
+    template <typename MemT>
+    Pose(const BLA::Matrix<4, 4, MemT>& mat)
+        : R(mat.template Submatrix<3, 3>(0, 0)), p(mat.template Submatrix<3, 1>(0, 3))
+    {
+    }
+
+    template <class MemT>
+    Pose& operator=(const BLA::Matrix<4, 4, MemT>& mat)
+    {
+        R = mat.template Submatrix<3, 3>(0, 0);
+        p = mat.template Submatrix<3, 1>(0, 3);
+
+        return *this;
+    }
+
+    Pose operator*(const Pose& other);
     Translation operator*(const Translation& other);
 
-    Transformation inv();
+    Pose inv() const;
 };
 
 class SpatialVelocity
@@ -41,6 +54,8 @@ class SpatialVelocity
     SpatialVelocity(const BLA::Matrix<6>& mat);
 
     SpatialVelocity& operator=(const BLA::Matrix<6>& mat);
+
+    SpatialVelocity operator*(float theta);
 };
 
 SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V);
@@ -49,12 +64,15 @@ BLA::Matrix<3, 3> skew(const BLA::Matrix<3>& w);
 BLA::Matrix<4, 4> skew(const BLA::Matrix<6>& v);
 
 Rotation exp(const AngularVelocity& w);
-Transformation exp(const SpatialVelocity& v);
+Pose exp(const SpatialVelocity& v);
 
 AngularVelocity log(const Rotation& R);
-SpatialVelocity log(const Transformation& T);
+SpatialVelocity log(const Pose& T);
 
-BLA::Matrix<6, 6> adjoint(const Transformation& T);
+BLA::Matrix<6, 6> adjoint(const Pose& T);
 BLA::Matrix<6, 6> adjoint(const SpatialVelocity& v);
+
+Print& operator<<(Print& strm, const Pose& T);
+Print& operator<<(Print& strm, const SpatialVelocity& T);
 
 }  // namespace Geometry

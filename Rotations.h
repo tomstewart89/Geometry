@@ -15,6 +15,8 @@ class Quaternion
     BLA::Matrix<4> elems;
 
    public:
+    Quaternion() = default;
+
     Quaternion(float x, float y, float z, float w);
 
     Quaternion(const Rotation& R);
@@ -27,6 +29,8 @@ class Quaternion
     Rotation to_rotation_matrix() const;
 
     Quaternion operator*(const Quaternion& other) const;
+
+    friend Print& operator<<(Print& strm, const Quaternion& quat);
 };
 
 class EulerAngles
@@ -63,6 +67,8 @@ class EulerAngles
     const RotationFrame frame;
     const RotationOrder order;
 
+    EulerAngles() = default;
+
     EulerAngles(float phi, float theta, float psi, RotationFrame frame = RotationFrame::Static,
                 RotationOrder order = RotationOrder::XYZ);
 
@@ -70,6 +76,8 @@ class EulerAngles
                 RotationOrder order = RotationOrder::XYZ);
 
     Rotation to_rotation_matrix() const;
+
+    friend Print& operator<<(Print& strm, const EulerAngles& euler);
 };
 
 }  // namespace Geometry

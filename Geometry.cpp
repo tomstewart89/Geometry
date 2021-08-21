@@ -4,26 +4,13 @@ using namespace BLA;
 
 namespace Geometry
 {
-Transformation::Transformation(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
+Pose::Pose(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
 
-Transformation::Transformation(const Matrix<4, 4>& mat) : R(mat.Submatrix<3, 3>(0, 0)), p(mat.Submatrix<3, 1>(0, 3)) {}
+Pose Pose::operator*(const Pose& other) { return Pose(R * other.R, R * other.p + p); }
 
-Transformation& Transformation::operator=(const BLA::Matrix<4, 4>& mat)
-{
-    R = mat.Submatrix<3, 3>(0, 0);
-    p = mat.Submatrix<3, 1>(0, 3);
+Translation Pose::operator*(const Translation& other) { return R * other + p; }
 
-    return *this;
-}
-
-Transformation Transformation::operator*(const Transformation& other)
-{
-    return Transformation(R * other.R, R * other.p + p);
-}
-
-Translation Transformation::operator*(const Translation& other) { return R * other + p; }
-
-Transformation Transformation::inv() { return Transformation(~R, -(~R * p)); }
+Pose Pose::inv() const { return Pose(~R, -(~R * p)); }
 
 SpatialVelocity::SpatialVelocity(const AngularVelocity& w_, const LinearVelocity& v_) : w(w_), v(v_) {}
 
@@ -36,6 +23,8 @@ SpatialVelocity& SpatialVelocity::operator=(const Matrix<6>& mat)
 
     return *this;
 }
+
+SpatialVelocity SpatialVelocity::operator*(float theta) { return SpatialVelocity(w * theta, v * theta); }
 
 SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V)
 {
@@ -88,7 +77,7 @@ Rotation exp(const AngularVelocity& w)
     return Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
 }
 
-Transformation exp(const SpatialVelocity& V)
+Pose exp(const SpatialVelocity& V)
 {
     auto theta = Norm(V.w);
 
@@ -100,7 +89,7 @@ Transformation exp(const SpatialVelocity& V)
     auto so3_skew = skew(V.w / theta);
     auto so3_skew_sq = so3_skew * so3_skew;
 
-    Transformation T;
+    Pose T;
     T.R = exp(V.w);
     T.p = (Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) * V.v;
 
@@ -141,7 +130,7 @@ AngularVelocity log(const Rotation& R)
     return w;
 }
 
-SpatialVelocity log(const Transformation& T)
+SpatialVelocity log(const Pose& T)
 {
     SpatialVelocity V;
 
@@ -167,7 +156,7 @@ SpatialVelocity log(const Transformation& T)
     return V;
 }
 
-Matrix<6, 6> adjoint(const Transformation& T)
+Matrix<6, 6> adjoint(const Pose& T)
 {
     Matrix<6, 6> adj_m = Zeros<6, 6>();
 
@@ -187,6 +176,26 @@ Matrix<6, 6> adjoint(const SpatialVelocity& V)
     adj_m.Submatrix<3, 3>(3, 0) = skew(V.v);
 
     return adj_m;
+}
+
+Print& operator<<(Print& strm, const Pose& T)
+{
+    strm.print("R: ");
+    strm << T.R;
+    strm.print(" p: ");
+    strm << T.p;
+
+    return strm;
+}
+
+Print& operator<<(Print& strm, const SpatialVelocity& V)
+{
+    strm.print("w: ");
+    strm << V.w;
+    strm.print(" v: ");
+    strm << V.v;
+
+    return strm;
 }
 
 }  // namespace Geometry
