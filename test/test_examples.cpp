@@ -40,18 +40,27 @@ TEST(Examples, EulerAngles)
                  "Tricky rotation in euler angles[[1.57],[-0.79],[3.14]]");
 }
 
-namespace PoseGraph
+#include "../examples/PoseGraph/PoseGraph.h"
+
+namespace PoseGraphExample
 {
 #include "../examples/PoseGraph/PoseGraph.ino"
 }
 
 TEST(Examples, PoseGraph)
 {
-    PoseGraph::setup();
+    PoseGraphExample::setup();
 
-    // std::cout << Serial.buf.str();
-
-    // EXPECT_STREQ(Serial.buf.str().c_str(), "");
+    EXPECT_STREQ(Serial.buf.str().c_str(),
+                 "D frame measured from A:\n"
+                 "R: [[1.00,0.00,0.00],[0.00,1.00,0.00],[0.00,0.00,1.00]] p: [[1.00],[1.00],[1.00]]\n"
+                 "Still the same offset from A to D:\n"
+                 "R: [[1.00,0.00,0.00],[0.00,1.00,0.00],[0.00,0.00,1.00]] p: [[1.00],[1.00],[1.00]]\n"
+                 "Couldn't add transform from B to E\n"
+                 "The pose of a frame relative to itself:\n"
+                 "R: [[1.00,0.00,0.00],[0.00,1.00,0.00],[0.00,0.00,1.00]] p: [[0.00],[0.00],[0.00]]\n"
+                 "Back to where we started:\n"
+                 "R: [[1.00,0.00,0.00],[0.00,1.00,0.00],[0.00,0.00,1.00]] p: [[-0.00],[-0.00],[-0.00]]\n");
 }
 
 namespace InverseDynamics

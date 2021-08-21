@@ -21,8 +21,9 @@ target_link_libraries(test_geometry gtest_main)
 add_executable(test_rotations ../Rotations.cpp test_rotations.cpp)
 target_link_libraries(test_rotations gtest_main)
 
-add_executable(test_examples ../Rotations.cpp ../Geometry.cpp test_examples.cpp)
+add_executable(test_examples ../Rotations.cpp ../Geometry.cpp ../examples/PoseGraph/PoseGraph.cpp test_examples.cpp)
 target_link_libraries(test_examples gtest_main)
+target_include_directories(test_examples PUBLIC "${PROJECT_SOURCE_DIR}/../examples/PoseGraph")
 
 include(GoogleTest)
 
