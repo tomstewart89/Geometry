@@ -48,7 +48,7 @@ TEST(Geometry, se3LogExp)
 
 TEST(Geometry, AdjointConversions)
 {
-    Transformation Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
+    Pose Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
 
     SpatialVelocity Vb({0, 0, -2}, {2.8, 4, 0.0});
 
@@ -68,7 +68,7 @@ TEST(Geometry, AdjointConversions)
 
 TEST(Geometry, SE3Inverse)
 {
-    Transformation Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
+    Pose Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
 
     auto identity = Tsb.inv() * Tsb;
 

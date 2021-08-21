@@ -194,4 +194,16 @@ Rotation EulerAngles::to_rotation_matrix() const
     return R;
 }
 
+Print& operator<<(Print& strm, const EulerAngles& euler)
+{
+    strm << euler.angles;
+    return strm;
+}
+
+Print& operator<<(Print& strm, const Quaternion& quat)
+{
+    strm << quat.elems;
+    return strm;
+}
+
 }  // namespace Geometry

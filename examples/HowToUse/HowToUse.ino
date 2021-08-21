@@ -84,7 +84,7 @@ void setup()
 
     // Our drone has some fancy perception system onboard and it can measure that the other drone is at the same
     // altitude as itself and is 2 units away along its Y-axis. It can also tell that the other drone is banking at 15
-    // degrees (~0.26 radians) about its X-axis.
+    // degrees (around 0.26 radians) about its X-axis.
     const float bank_angle = 0.26;
 
     // Using that information we can come up with a pose of the other drone relative to our drone:
@@ -126,7 +126,7 @@ void setup()
     Serial << "T_GS_otherdrone: " << T_GS_drone * T_drone_otherdrone << "\n";
 
     // If we take the inverse of a transformation then we essentially flip the target and source frames, so:
-    Serial << "T_otherdrone_GS: " << (T_GS_drone * T_drone_otherdrone).inv() << "\n";
+    Serial << "T_otherdrone_GS: " << (T_GS_drone * T_drone_otherdrone).inv();
 
     // If you'd like to see this chained transformation thing taken to the extreme, have a look at the PoseGraph
     // example!
