@@ -32,8 +32,8 @@ TEST(Geometry, so3LogExp)
 
 TEST(Geometry, se3LogExp)
 {
-    SpatialVelocity se3({0.1, 0.2, 0.3}, {0.5773, 0.5773, 0.5773});
-    SpatialVelocity se3_log_exp = log(exp(se3));
+    Twist se3({0.1, 0.2, 0.3}, {0.5773, 0.5773, 0.5773});
+    Twist se3_log_exp = log(exp(se3));
 
     for (int i = 0; i < 3; ++i)
     {
@@ -50,10 +50,10 @@ TEST(Geometry, AdjointConversions)
 {
     Pose Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
 
-    SpatialVelocity Vb({0, 0, -2}, {2.8, 4, 0.0});
+    Twist Vb({0, 0, -2}, {2.8, 4, 0.0});
 
-    SpatialVelocity Vs = adjoint(Tsb) * Vb;
-    SpatialVelocity Vs_expected({0, 0, 2}, {-2, -4, 0.0});
+    Twist Vs = adjoint(Tsb) * Vb;
+    Twist Vs_expected({0, 0, 2}, {-2, -4, 0.0});
 
     for (int i = 0; i < 3; ++i)
     {
@@ -70,7 +70,7 @@ TEST(Geometry, SE3Inverse)
 {
     Pose Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
 
-    auto identity = Tsb.inv() * Tsb;
+    auto identity = Tsb.inverse() * Tsb;
 
     for (int i = 0; i < 3; ++i)
     {

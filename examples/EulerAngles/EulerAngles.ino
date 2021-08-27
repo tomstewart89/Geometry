@@ -78,7 +78,7 @@ void setup()
 
     // It's still possible to represent whatever 3D rotation we like using euler angles, but in the case above we'll
     // have to choose a different value for the second rotation.
-    Rotation tricky_rotation = {-0.707, 0.0, -1.0, 0.0, 0.707, 0.0, 0.707, 0.707, 0.0};
+    Rotation tricky_rotation = BLA::Matrix<3, 3>(-0.707, 0.0, -1.0, 0.0, 0.707, 0.0, 0.707, 0.707, 0.0);
     EulerAngles tricky_rotation_in_euler_angles(tricky_rotation);
     Serial << "Tricky rotation in euler angles" << tricky_rotation_in_euler_angles;
 
