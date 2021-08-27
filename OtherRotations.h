@@ -4,11 +4,11 @@
 
 #include "Arduino.h"
 #include "BasicLinearAlgebra.h"
-#include "Rotations.h"
+#include "Geometry.h"
 
 namespace Geometry
 {
-using Rotation = BLA::Matrix<3, 3>;
+class Rotation;
 
 class Quaternion
 {

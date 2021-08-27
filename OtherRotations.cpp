@@ -1,4 +1,4 @@
-#include "Rotations.h"
+#include "OtherRotations.h"
 
 using namespace BLA;
 
@@ -54,9 +54,9 @@ Rotation Quaternion::to_rotation_matrix() const
 
     auto M = (elems * ~elems) * (2.0 / nq);
 
-    return {1.0f - M(1, 1) - M(2, 2), M(0, 1) - M(2, 3),       M(0, 2) + M(1, 3),
-            M(0, 1) + M(2, 3),        1.0 - M(0, 0) - M(2, 2), M(1, 2) - M(0, 3),
-            M(0, 2) - M(1, 3),        M(1, 2) + M(0, 3),       1.0 - M(0, 0) - M(1, 1)};
+    return BLA::Matrix<3, 3>(1.0f - M(1, 1) - M(2, 2), M(0, 1) - M(2, 3), M(0, 2) + M(1, 3), M(0, 1) + M(2, 3),
+                             1.0 - M(0, 0) - M(2, 2), M(1, 2) - M(0, 3), M(0, 2) - M(1, 3), M(1, 2) + M(0, 3),
+                             1.0 - M(0, 0) - M(1, 1));
 }
 
 Quaternion Quaternion::operator*(const Quaternion& other) const

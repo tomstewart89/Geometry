@@ -1,4 +1,4 @@
-#include <Rotations.h>
+#include <OtherRotations.h>
 #include <gtest/gtest.h>
 
 using namespace Geometry;
