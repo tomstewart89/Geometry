@@ -1,7 +1,7 @@
 #include <Geometry.h>
 
 /*
- * This example sketch should show you everything you need to know in order to work with the Geometry library. This
+ * This example sketch should show you everything you need to know to get up and running with the Geometry library. This
  * library is all about representing where things are in 3D space; be it your robot's end effector, the center
  * of mass of your drone or whatever else.
  *
@@ -105,7 +105,7 @@ void setup()
 
     // And actually the other drone probably needs the pose of the ground station relative to it, which we can also
     // calculate quite easily:
-    Pose GS_relative_to_other_drone = other_drone_relative_to_GS.inv();
+    Pose GS_relative_to_other_drone = other_drone_relative_to_GS.inverse();
 
     // So what's the intutition behind these last couple of lines? Basically while poses are handy for representing the
     // 3D position and orientation of a thing, they can also be interpreted as a desription of how to change the
@@ -126,7 +126,7 @@ void setup()
     Serial << "T_GS_otherdrone: " << T_GS_drone * T_drone_otherdrone << "\n";
 
     // If we take the inverse of a transformation then we essentially flip the target and source frames, so:
-    Serial << "T_otherdrone_GS: " << (T_GS_drone * T_drone_otherdrone).inv();
+    Serial << "T_otherdrone_GS: " << (T_GS_drone * T_drone_otherdrone).inverse();
 
     // If you'd like to see this chained transformation thing taken to the extreme, have a look at the PoseGraph
     // example!

@@ -30,7 +30,7 @@ struct PoseGraph
 
    private:
     int num_frames = 0;
-    Frame* frames[max_frames];
+    Frame* frames[max_frames] = {NULL};
     Geometry::Pose* transforms[max_frames][max_frames] = {NULL};
 
     Frame* get_frame(const char* frame_id);

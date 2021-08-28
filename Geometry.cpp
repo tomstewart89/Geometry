@@ -6,35 +6,17 @@ namespace Geometry
 {
 Pose::Pose(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
 
-Pose Pose::operator*(const Pose& other) { return Pose(R * other.R, R * other.p + p); }
+Pose operator*(const Pose& pose, const Pose& other) { return Pose(pose.R * other.R, pose.R * other.p + pose.p); }
 
-Translation Pose::operator*(const Translation& other) { return R * other + p; }
+Translation operator*(const Pose& pose, const Translation& other) { return pose.R * other + pose.p; }
 
-Pose Pose::inv() const { return Pose(~R, -(~R * p)); }
+Twist operator*(const Pose& pose, const Twist& twist) { return adjoint(pose) * twist; }
 
-SpatialVelocity::SpatialVelocity(const AngularVelocity& w_, const LinearVelocity& v_) : w(w_), v(v_) {}
+Twist operator*(const Twist& twist, const Twist& other) { return adjoint(twist) * other; }
 
-SpatialVelocity::SpatialVelocity(const Matrix<6>& mat) : w(mat.Submatrix<3, 1>(0, 0)), v(mat.Submatrix<3, 1>(3, 0)) {}
+Wrench operator*(const Pose& pose, const Wrench& wrench) { return ~adjoint(pose) * wrench; }
 
-SpatialVelocity& SpatialVelocity::operator=(const Matrix<6>& mat)
-{
-    w = mat.Submatrix<3, 1>(0, 0);
-    v = mat.Submatrix<3, 1>(3, 0);
-
-    return *this;
-}
-
-SpatialVelocity SpatialVelocity::operator*(float theta) { return SpatialVelocity(w * theta, v * theta); }
-
-SpatialVelocity operator*(const BLA::Matrix<6, 6>& A, const SpatialVelocity& V)
-{
-    SpatialVelocity ret;
-
-    ret.w = A.Submatrix<3, 3>(0, 0) * V.w + A.Submatrix<3, 3>(0, 3) * V.v;
-    ret.v = A.Submatrix<3, 3>(3, 0) * V.w + A.Submatrix<3, 3>(3, 3) * V.v;
-
-    return ret;
-}
+Pose Pose::inverse() const { return Pose(~R, -(~R * p)); }
 
 Matrix<3, 3> skew(const Matrix<3>& w)
 {
@@ -77,21 +59,22 @@ Rotation exp(const AngularVelocity& w)
     return Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
 }
 
-Pose exp(const SpatialVelocity& V)
+Pose exp(const Twist& V)
 {
-    auto theta = Norm(V.w);
+    auto theta = Norm(V.Submatrix<3, 1>(0, 0));
 
     if (fabs(theta) < 1e-5)
     {
         theta = 1.0;
     }
 
-    auto so3_skew = skew(V.w / theta);
+    auto so3_skew = skew(V.Submatrix<3, 1>(0, 0) / theta);
     auto so3_skew_sq = so3_skew * so3_skew;
 
     Pose T;
-    T.R = exp(V.w);
-    T.p = (Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) * V.v;
+    T.R = exp(V.Submatrix<3, 1>(0, 0));
+    T.p = (Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) *
+          V.Submatrix<3, 1>(3, 0);
 
     return T;
 }
@@ -130,14 +113,14 @@ AngularVelocity log(const Rotation& R)
     return w;
 }
 
-SpatialVelocity log(const Pose& T)
+Twist log(const Pose& T)
 {
-    SpatialVelocity V;
+    Twist V;
 
     if (Norm(T.R - Identity<3>()) < 1e-5)
     {
-        V.w.Fill(0);
-        V.v = T.p;
+        V.Submatrix<3, 1>(0, 0).Fill(0);
+        V.Submatrix<3, 1>(3, 0) = T.p;
     }
     else
     {
@@ -149,8 +132,8 @@ SpatialVelocity log(const Pose& T)
         auto G_inv = Identity<3>() / theta - so3_skew / 2.0 +
                      so3_skew_sq * (1.0 / theta - cos(theta / 2.0) / sin(theta / 2.0) / 2.0);
 
-        V.w = w;
-        V.v = G_inv * T.p;
+        V.Submatrix<3, 1>(0, 0) = w;
+        V.Submatrix<3, 1>(3, 0) = G_inv * T.p;
     }
 
     return V;
@@ -167,13 +150,13 @@ Matrix<6, 6> adjoint(const Pose& T)
     return adj_m;
 }
 
-Matrix<6, 6> adjoint(const SpatialVelocity& V)
+Matrix<6, 6> adjoint(const Twist& V)
 {
     Matrix<6, 6> adj_m = Zeros<6, 6>();
 
-    adj_m.Submatrix<3, 3>(0, 0) = skew(V.w);
-    adj_m.Submatrix<3, 3>(3, 3) = skew(V.w);
-    adj_m.Submatrix<3, 3>(3, 0) = skew(V.v);
+    adj_m.Submatrix<3, 3>(0, 0) = skew(V.Submatrix<3, 1>(0, 0));
+    adj_m.Submatrix<3, 3>(3, 3) = skew(V.Submatrix<3, 1>(0, 0));
+    adj_m.Submatrix<3, 3>(3, 0) = skew(V.Submatrix<3, 1>(3, 0));
 
     return adj_m;
 }
@@ -188,12 +171,12 @@ Print& operator<<(Print& strm, const Pose& T)
     return strm;
 }
 
-Print& operator<<(Print& strm, const SpatialVelocity& V)
+Print& operator<<(Print& strm, const Twist& V)
 {
     strm.print("w: ");
-    strm << V.w;
+    strm << V.Submatrix<3, 1>(0, 0);
     strm.print(" v: ");
-    strm << V.v;
+    strm << V.Submatrix<3, 1>(3, 0);
 
     return strm;
 }

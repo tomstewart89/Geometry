@@ -2,13 +2,14 @@
 #include <gtest/gtest.h>
 
 using namespace Geometry;
+using namespace BLA;
 
 TEST(Geometry, so3Exp)
 {
-    AngularVelocity so3 = {0, 0.454, 0.262};
+    AngularVelocity so3 = Matrix<3>(0, 0.454, 0.262);
 
     Rotation SO3 = exp(so3);
-    Rotation SO3_expected = {0.866, -0.25, 0.433, 0.25, 0.967, 0.058, -0.433, 0.058, 0.899};
+    Rotation SO3_expected = Matrix<3,3>(0.866, -0.25, 0.433, 0.25, 0.967, 0.058, -0.433, 0.058, 0.899);
 
     for (int i = 0; i < 3; ++i)
     {
@@ -21,7 +22,7 @@ TEST(Geometry, so3Exp)
 
 TEST(Geometry, so3LogExp)
 {
-    AngularVelocity so3 = {0.53453, 0.214, 2.5554};
+    AngularVelocity so3 = Matrix<3>(0.53453, 0.214, 2.5554);
     AngularVelocity so3_log_exp = log(exp(so3));
 
     for (int i = 0; i < 3; ++i)
@@ -32,45 +33,35 @@ TEST(Geometry, so3LogExp)
 
 TEST(Geometry, se3LogExp)
 {
-    SpatialVelocity se3({0.1, 0.2, 0.3}, {0.5773, 0.5773, 0.5773});
-    SpatialVelocity se3_log_exp = log(exp(se3));
+    Twist se3 = Matrix<6>(0.1, 0.2, 0.3, 0.5773, 0.5773, 0.5773);
+    Twist se3_log_exp = log(exp(se3));
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 6; ++i)
     {
-        EXPECT_NEAR(se3.w(i), se3_log_exp.w(i), 1e-3);
-    }
-
-    for (int i = 0; i < 3; ++i)
-    {
-        EXPECT_NEAR(se3.v(i), se3_log_exp.v(i), 1e-3);
+        EXPECT_NEAR(se3(i), se3_log_exp(i), 1e-3);
     }
 }
 
 TEST(Geometry, AdjointConversions)
 {
-    Pose Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
+    Pose Tsb(Matrix<3,3>(-1, 0, 0, 0, 1, 0, 0, 0, -1), {4, 0.4, 0});
 
-    SpatialVelocity Vb({0, 0, -2}, {2.8, 4, 0.0});
+    Twist Vb = Matrix<6>(0, 0, -2,2.8, 4, 0.0);
 
-    SpatialVelocity Vs = adjoint(Tsb) * Vb;
-    SpatialVelocity Vs_expected({0, 0, 2}, {-2, -4, 0.0});
+    Twist Vs = adjoint(Tsb) * Vb;
+    Twist Vs_expected = Matrix<6>(0, 0, 2, -2, -4, 0.0);
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 6; ++i)
     {
-        EXPECT_NEAR(Vs.w(i), Vs_expected.w(i), 1e-3);
-    }
-
-    for (int i = 0; i < 3; ++i)
-    {
-        EXPECT_NEAR(Vs.v(i), Vs_expected.v(i), 1e-3);
+        EXPECT_NEAR(Vs(i), Vs_expected(i), 1e-3);
     }
 }
 
 TEST(Geometry, SE3Inverse)
 {
-    Pose Tsb({-1, 0, 0, 0, 1, 0, 0, 0, -1}, {4, 0.4, 0});
+    Pose Tsb(Matrix<3,3>(-1, 0, 0, 0, 1, 0, 0, 0, -1), {4, 0.4, 0});
 
-    auto identity = Tsb.inv() * Tsb;
+    auto identity = Tsb.inverse() * Tsb;
 
     for (int i = 0; i < 3; ++i)
     {

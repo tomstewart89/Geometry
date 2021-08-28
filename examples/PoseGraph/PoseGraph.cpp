@@ -1,4 +1,4 @@
-#include <PoseGraph.h>
+#include "PoseGraph.h"
 
 using namespace Geometry;
 using namespace BLA;
@@ -47,7 +47,7 @@ bool PoseGraph::add_transform(const char* target_frame_id, const char* source_fr
     Frame* source_frame = get_frame(source_frame_id);
 
     transforms[target_frame->index][source_frame->index] = new Pose(transform);
-    transforms[source_frame->index][target_frame->index] = new Pose(transform.inv());
+    transforms[source_frame->index][target_frame->index] = new Pose(transform.inverse());
 
     return true;
 }
@@ -111,7 +111,7 @@ PoseGraph::LookupResult PoseGraph::get_transform(const char* target_frame_id, co
             frame = frame->parent;
         }
 
-        return {true, T_source_target.inv()};
+        return {true, T_source_target.inverse()};
     }
     else
     {

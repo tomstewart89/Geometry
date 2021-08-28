@@ -13,17 +13,21 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/.." "${PROJECT_SOURCE_DIR}/BasicLinearAlgebra")
+include_directories("${PROJECT_SOURCE_DIR}" "${PROJECT_SOURCE_DIR}/.."
+                    "${PROJECT_SOURCE_DIR}/BasicLinearAlgebra")
 
 add_executable(test_geometry ../Geometry.cpp test_geometry.cpp)
 target_link_libraries(test_geometry gtest_main)
 
-add_executable(test_rotations ../Rotations.cpp test_rotations.cpp)
+add_executable(test_rotations ../OtherRotations.cpp test_rotations.cpp)
 target_link_libraries(test_rotations gtest_main)
 
-add_executable(test_examples ../Rotations.cpp ../Geometry.cpp ../examples/PoseGraph/PoseGraph.cpp test_examples.cpp)
+add_executable(
+  test_examples ../OtherRotations.cpp ../Geometry.cpp
+                ../examples/PoseGraph/PoseGraph.cpp ../examples/InverseDynamics/InverseDynamics.cpp test_examples.cpp)
 target_link_libraries(test_examples gtest_main)
-target_include_directories(test_examples PUBLIC "${PROJECT_SOURCE_DIR}/../examples/PoseGraph")
+target_include_directories(test_examples
+                           PUBLIC "${PROJECT_SOURCE_DIR}/../examples/PoseGraph" "${PROJECT_SOURCE_DIR}/../examples/InverseDynamics")
 
 include(GoogleTest)
 

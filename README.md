@@ -41,19 +41,19 @@ Rotation R = exp(w);
 AngularVelocity also_w = log(R);
 ```
 
-### Pose and Spatial Velocity
+### Pose and Twist
 A Pose combines a rotation with a translation to fully describe the location of a body in space. You can think of a Pose as a cartesian position concatenated onto a rotation matrix like so:
 
 ![Pose](https://user-images.githubusercontent.com/2457362/130322395-a98e373b-a4ae-413c-91d3-3f0ea118f53f.png)
 
 Poses can represent the location of a body in space or a transformation from one coordinate frame to another. For more information on that take a look at the [HowToUse example](https://github.com/tomstewart89/Geometry/blob/master/examples/HowToUse/HowToUse.ino). If you want to dive deeper, take a look at the [PoseGraph example](https://github.com/tomstewart89/Geometry/blob/master/examples/PoseGraph/PoseGraph.ino) for a nice self-contained implementation of something that resembles ROS's [TF package](http://wiki.ros.org/tf).
 
-Analogous to rotation and angular velocity, the velocity counterpart of a pose is a `SpatialVelocity`. Which combines an angular velocity llinear velocity to fully represent the velocity of a body in space. We can convert a spatial velocity to a pose and back again using the exponential and logarithm functions:
+Analogous to rotation and angular velocity, the velocity counterpart of a pose is a `Twist`. Which combines an angular velocity llinear velocity to fully represent the velocity of a body in space. We can convert a twist to a pose and back again using the exponential and logarithm functions:
 
 ```cpp
-SpatialVelocity V(0.1, 0.2, 0.3, 0.4, 0.5, 0.6);
+Twist V(0.1, 0.2, 0.3, 0.4, 0.5, 0.6);
 Pose T = exp(V);
-SpatialVelocity also_V = log(T);
+Twist also_V = log(T);
 ```
 
 These conversions allow us to transform spatial velocities between different coordinate frames which allows for some pretty fancy kinematics algorithms. If you're interested in that, have a look at the [InverseDynamics example](https://github.com/tomstewart89/Geometry/blob/master/examples/InverseDynamics/InverseDynamics.ino).
