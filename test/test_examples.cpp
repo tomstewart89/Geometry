@@ -63,6 +63,8 @@ TEST(Examples, PoseGraph)
                  "R: [[1.00,0.00,0.00],[0.00,1.00,0.00],[0.00,0.00,1.00]] p: [[-0.00],[-0.00],[-0.00]]\n");
 }
 
+#include "../examples/InverseDynamics/InverseDynamics.h"
+
 namespace InverseDynamics
 {
 #include "../examples/InverseDynamics/InverseDynamics.ino"
@@ -72,7 +74,19 @@ TEST(Examples, InverseDynamics)
 {
     InverseDynamics::setup();
 
-    EXPECT_STREQ(Serial.buf.str().c_str(), "");
+    EXPECT_STREQ(Serial.buf.str().c_str(),
+                 "Dangling:\n"
+                 "shoulder torque: 0.00\n"
+                 "elbow torque: 0.00\n"
+                 "wrist torque: 0.00\n\n"
+                 "Outstreched:\n"
+                 "shoulder torque: -17.66\n"
+                 "elbow torque: -7.85\n"
+                 "wrist torque: -1.96\n\n"
+                 "Supported:\n"
+                 "shoulder torque: 5.89\n"
+                 "elbow torque: 3.92\n"
+                 "wrist torque: -1.96");
 }
 
 int main(int argc, char **argv)

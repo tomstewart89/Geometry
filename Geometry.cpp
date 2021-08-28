@@ -12,9 +12,9 @@ Translation operator*(const Pose& pose, const Translation& other) { return pose.
 
 Twist operator*(const Pose& pose, const Twist& twist) { return adjoint(pose) * twist; }
 
-Twist operator*(const Twist& twist, const Twist& other) { return adjoint(twist) * twist; }
+Twist operator*(const Twist& twist, const Twist& other) { return adjoint(twist) * other; }
 
-Wrench operator*(const Pose& pose, const Wrench& wrench) { ~adjoint(pose) * wrench; }
+Wrench operator*(const Pose& pose, const Wrench& wrench) { return ~adjoint(pose) * wrench; }
 
 Pose Pose::inverse() const { return Pose(~R, -(~R * p)); }
 

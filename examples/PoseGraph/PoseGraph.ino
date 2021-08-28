@@ -57,7 +57,7 @@ void setup()
 
     // As a final example, let's walk around in a circle and see that where we wind up is the same pose as where we
     // started:
-    Pose translate_then_turn_left({0, -1, 0, 1, 0, 0, 0, 0, 1}, {0, 1, 0});
+    Pose translate_then_turn_left(Matrix<3,3>(0, -1, 0, 1, 0, 0, 0, 0, 1), {0, 1, 0});
 
     graph.add_transform("bottom_left", "bottom_right", translate_then_turn_left);
     graph.add_transform("bottom_right", "top_right", translate_then_turn_left);

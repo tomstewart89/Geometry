@@ -24,10 +24,10 @@ target_link_libraries(test_rotations gtest_main)
 
 add_executable(
   test_examples ../OtherRotations.cpp ../Geometry.cpp
-                ../examples/PoseGraph/PoseGraph.cpp test_examples.cpp)
+                ../examples/PoseGraph/PoseGraph.cpp ../examples/InverseDynamics/InverseDynamics.cpp test_examples.cpp)
 target_link_libraries(test_examples gtest_main)
 target_include_directories(test_examples
-                           PUBLIC "${PROJECT_SOURCE_DIR}/../examples/PoseGraph")
+                           PUBLIC "${PROJECT_SOURCE_DIR}/../examples/PoseGraph" "${PROJECT_SOURCE_DIR}/../examples/InverseDynamics")
 
 include(GoogleTest)
 

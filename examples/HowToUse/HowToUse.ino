@@ -1,7 +1,7 @@
 #include <Geometry.h>
 
 /*
- * This example sketch should show you everything you need to know in order to work with the Geometry library. This
+ * This example sketch should show you everything you need to know to get up and running with the Geometry library. This
  * library is all about representing where things are in 3D space; be it your robot's end effector, the center
  * of mass of your drone or whatever else.
  *
