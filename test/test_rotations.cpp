@@ -6,7 +6,7 @@ using namespace Geometry;
 TEST(MoreRotationFormats, QuaternionConversions)
 {
     Quaternion q_expected = {0.707, 0, 0.707, 0};
-    Rotation R_expected = BLA::Matrix<3,3>(0, 0, 1, 0, -1, 0, 1, 0, 0);
+    Rotation R_expected = BLA::Matrix<3, 3>(0, 0, 1, 0, -1, 0, 1, 0, 0);
 
     auto R = q_expected.to_rotation_matrix();
 
@@ -58,7 +58,7 @@ TEST(MoreRotationFormats, EulerAngleConversions)
 {
     EulerAngles euler_expected(0.1, 0.2, 0.3);
 
-    Rotation R_expected = BLA::Matrix<3,3>(0.936, -0.275, 0.218, 0.290, 0.956, -0.0370, -0.199, 0.098, 0.975);
+    Rotation R_expected = BLA::Matrix<3, 3>(0.936, -0.275, 0.218, 0.290, 0.956, -0.0370, -0.199, 0.098, 0.975);
     Rotation R = euler_expected.to_rotation_matrix();
 
     for (int i = 0; i < 3; ++i)
@@ -74,6 +74,13 @@ TEST(MoreRotationFormats, EulerAngleConversions)
     EXPECT_NEAR(euler.phi(), euler_expected.phi(), 1e-3);
     EXPECT_NEAR(euler.theta(), euler_expected.theta(), 1e-3);
     EXPECT_NEAR(euler.psi(), euler_expected.psi(), 1e-3);
+
+    R = BLA::Identity<3, 3>();
+    EulerAngles zero_euler(R);
+
+    EXPECT_NEAR(zero_euler.phi(), 0, 1e-3);
+    EXPECT_NEAR(zero_euler.theta(), 0, 1e-3);
+    EXPECT_NEAR(zero_euler.psi(), 0, 1e-3);
 }
 
 TEST(MoreRotationFormats, OtherEulerAngleFramesAndOrders)
