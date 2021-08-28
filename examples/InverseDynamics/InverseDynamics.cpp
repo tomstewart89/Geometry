@@ -65,3 +65,5 @@ void inverse_dynamics(Link &root, const Twist &gravity)
         link = link->parent;
     }
 }
+
+void loop() {}
