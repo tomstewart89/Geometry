@@ -75,18 +75,10 @@ TEST(Examples, InverseDynamics)
     InverseDynamics::setup();
 
     EXPECT_STREQ(Serial.buf.str().c_str(),
-                 "Dangling:\n"
-                 "shoulder torque: 0.00\n"
-                 "elbow torque: 0.00\n"
-                 "wrist torque: 0.00\n\n"
-                 "Outstreched:\n"
-                 "shoulder torque: -17.66\n"
-                 "elbow torque: -7.85\n"
-                 "wrist torque: -1.96\n\n"
-                 "Supported:\n"
-                 "shoulder torque: 5.89\n"
-                 "elbow torque: 3.92\n"
-                 "wrist torque: -1.96");
+                 "Dangling: 0.00, 0.00, 0.00\n"
+                 "Outstreched: -17.66, -7.85, -1.96\n"
+                 "Supported: -1.96, 0.00, -1.96\n"
+                 "Waving around: 13.48, 6.45, -0.46\n");
 }
 
 int main(int argc, char **argv)

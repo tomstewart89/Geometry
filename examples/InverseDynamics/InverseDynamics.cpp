@@ -5,6 +5,7 @@ using namespace BLA;
 
 Link::Link(float mass, const BLA::Matrix<3, 3> &inertia, const Geometry::Translation &xyz,
            const Geometry::EulerAngles &rpy)
+    : external_force(Zeros<6>())
 {
     Pose inertia_pose(rpy.to_rotation_matrix(), xyz);
     spatial_inertia = Zeros<6, 6>();
