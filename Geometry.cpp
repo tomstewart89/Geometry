@@ -1,7 +1,5 @@
 #include "Geometry.h"
 
-using namespace BLA;
-
 namespace Geometry
 {
 Pose::Pose(const Rotation& R_, const Translation& p_) : R(R_), p(p_) {}
@@ -18,9 +16,9 @@ Wrench operator*(const Pose& pose, const Wrench& wrench) { return ~adjoint(pose)
 
 Pose Pose::inverse() const { return Pose(~R, -(~R * p)); }
 
-Matrix<3, 3> skew(const Matrix<3>& w)
+BLA::Matrix<3, 3> skew(const BLA::Matrix<3>& w)
 {
-    Matrix<3, 3> skew_m;
+    BLA::Matrix<3, 3> skew_m;
 
     skew_m(0, 0) = 0.0;
     skew_m(1, 1) = 0.0;
@@ -37,9 +35,9 @@ Matrix<3, 3> skew(const Matrix<3>& w)
     return skew_m;
 }
 
-Matrix<4, 4> skew(const Matrix<6>& V)
+BLA::Matrix<4, 4> skew(const BLA::Matrix<6>& V)
 {
-    Matrix<4, 4> skew_m = Zeros<4, 4>();
+    BLA::Matrix<4, 4> skew_m = BLA::Zeros<4, 4>();
 
     skew_m.Submatrix<3, 3>(0, 0) = skew(V.Submatrix<3, 1>(0, 0));
     skew_m.Submatrix<3, 1>(0, 3) = V.Submatrix<3, 1>(3, 0);
@@ -48,7 +46,7 @@ Matrix<4, 4> skew(const Matrix<6>& V)
 
 Rotation exp(const AngularVelocity& w)
 {
-    auto theta = Norm((Matrix<3>)w);
+    auto theta = Norm((BLA::Matrix<3>)w);
 
     if (fabs(theta) < 1e-5)
     {
@@ -56,7 +54,7 @@ Rotation exp(const AngularVelocity& w)
     }
 
     auto so3_skew = skew(w / theta);
-    return Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
+    return BLA::Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
 }
 
 Pose exp(const Twist& V)
@@ -73,7 +71,7 @@ Pose exp(const Twist& V)
 
     Pose T;
     T.R = exp(V.Submatrix<3, 1>(0, 0));
-    T.p = (Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) *
+    T.p = (BLA::Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) *
           V.Submatrix<3, 1>(3, 0);
 
     return T;
@@ -83,9 +81,9 @@ AngularVelocity log(const Rotation& R)
 {
     AngularVelocity w;
 
-    if (Norm(R - Identity<3>()) < 1e-5)
+    if (Norm(R - BLA::Identity<3>()) < 1e-5)
     {
-        w = Zeros<3>();
+        w = BLA::Zeros<3>();
     }
     else if (Trace(R) == -1.0)
     {
@@ -117,7 +115,7 @@ Twist log(const Pose& T)
 {
     Twist V;
 
-    if (Norm(T.R - Identity<3>()) < 1e-5)
+    if (Norm(T.R - BLA::Identity<3>()) < 1e-5)
     {
         V.Submatrix<3, 1>(0, 0).Fill(0);
         V.Submatrix<3, 1>(3, 0) = T.p;
@@ -129,7 +127,7 @@ Twist log(const Pose& T)
         auto so3_skew = skew(w / theta);
         auto so3_skew_sq = so3_skew * so3_skew;
 
-        auto G_inv = Identity<3>() / theta - so3_skew / 2.0 +
+        auto G_inv = BLA::Identity<3>() / theta - so3_skew / 2.0 +
                      so3_skew_sq * (1.0 / theta - cos(theta / 2.0) / sin(theta / 2.0) / 2.0);
 
         V.Submatrix<3, 1>(0, 0) = w;
@@ -139,9 +137,9 @@ Twist log(const Pose& T)
     return V;
 }
 
-Matrix<6, 6> adjoint(const Pose& T)
+BLA::Matrix<6, 6> adjoint(const Pose& T)
 {
-    Matrix<6, 6> adj_m = Zeros<6, 6>();
+    BLA::Matrix<6, 6> adj_m = BLA::Zeros<6, 6>();
 
     adj_m.Submatrix<3, 3>(0, 0) = T.R;
     adj_m.Submatrix<3, 3>(3, 3) = T.R;
@@ -150,9 +148,9 @@ Matrix<6, 6> adjoint(const Pose& T)
     return adj_m;
 }
 
-Matrix<6, 6> adjoint(const Twist& V)
+BLA::Matrix<6, 6> adjoint(const Twist& V)
 {
-    Matrix<6, 6> adj_m = Zeros<6, 6>();
+    BLA::Matrix<6, 6> adj_m = BLA::Zeros<6, 6>();
 
     adj_m.Submatrix<3, 3>(0, 0) = skew(V.Submatrix<3, 1>(0, 0));
     adj_m.Submatrix<3, 3>(3, 3) = skew(V.Submatrix<3, 1>(0, 0));
