@@ -60,16 +60,16 @@ class EulerAngles
         ZYZ
     };
 
-    float& phi() { return angles(0); }
-    float& theta() { return angles(1); }
-    float& psi() { return angles(2); }
+    float& first() { return angles(0); }
+    float& second() { return angles(1); }
+    float& third() { return angles(2); }
 
     const RotationFrame frame;
     const RotationOrder order;
 
     EulerAngles() = default;
 
-    EulerAngles(float phi, float theta, float psi, RotationFrame frame = RotationFrame::Static,
+    EulerAngles(float ai, float aj, float ak, RotationFrame frame = RotationFrame::Static,
                 RotationOrder order = RotationOrder::XYZ);
 
     EulerAngles(const Rotation& R, RotationFrame frame = RotationFrame::Static,

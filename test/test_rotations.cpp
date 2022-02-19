@@ -71,16 +71,16 @@ TEST(MoreRotationFormats, EulerAngleConversions)
 
     EulerAngles euler(R);
 
-    EXPECT_NEAR(euler.phi(), euler_expected.phi(), 1e-3);
-    EXPECT_NEAR(euler.theta(), euler_expected.theta(), 1e-3);
-    EXPECT_NEAR(euler.psi(), euler_expected.psi(), 1e-3);
+    EXPECT_NEAR(euler.first(), euler_expected.first(), 1e-3);
+    EXPECT_NEAR(euler.second(), euler_expected.second(), 1e-3);
+    EXPECT_NEAR(euler.third(), euler_expected.third(), 1e-3);
 
     R = BLA::Identity<3, 3>();
     EulerAngles zero_euler(R);
 
-    EXPECT_NEAR(zero_euler.phi(), 0, 1e-3);
-    EXPECT_NEAR(zero_euler.theta(), 0, 1e-3);
-    EXPECT_NEAR(zero_euler.psi(), 0, 1e-3);
+    EXPECT_NEAR(zero_euler.first(), 0, 1e-3);
+    EXPECT_NEAR(zero_euler.second(), 0, 1e-3);
+    EXPECT_NEAR(zero_euler.third(), 0, 1e-3);
 }
 
 TEST(MoreRotationFormats, OtherEulerAngleFramesAndOrders)

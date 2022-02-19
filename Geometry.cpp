@@ -48,31 +48,36 @@ Rotation exp(const AngularVelocity& w)
 {
     auto theta = Norm((BLA::Matrix<3>)w);
 
-    if (fabs(theta) < 1e-5)
+    if (theta == 0)
     {
-        theta = 1.0;
+        return BLA::Identity<3>();
     }
-
-    auto so3_skew = skew(w / theta);
-    return BLA::Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
+    else
+    {
+        auto so3_skew = skew(w / theta);
+        return BLA::Identity<3>() + so3_skew * sin(theta) + so3_skew * so3_skew * (1 - cos(theta));
+    }
 }
 
 Pose exp(const Twist& V)
 {
     auto theta = Norm(V.Submatrix<3, 1>(0, 0));
-
-    if (fabs(theta) < 1e-5)
-    {
-        theta = 1.0;
-    }
-
-    auto so3_skew = skew(V.Submatrix<3, 1>(0, 0) / theta);
-    auto so3_skew_sq = so3_skew * so3_skew;
-
     Pose T;
-    T.R = exp(V.Submatrix<3, 1>(0, 0));
-    T.p = (BLA::Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) *
-          V.Submatrix<3, 1>(3, 0);
+
+    if (theta == 0)
+    {
+        T.R = BLA::Identity<3>();
+        T.p = V.Submatrix<3, 1>(3, 0);
+    }
+    else
+    {
+        auto so3_skew = skew(V.Submatrix<3, 1>(0, 0) / theta);
+        auto so3_skew_sq = so3_skew * so3_skew;
+
+        T.R = exp(V.Submatrix<3, 1>(0, 0));
+        T.p = (BLA::Identity<3>() * theta + so3_skew * (1.0 - cos(theta)) + so3_skew_sq * (theta - sin(theta))) *
+              V.Submatrix<3, 1>(3, 0);
+    }
 
     return T;
 }
